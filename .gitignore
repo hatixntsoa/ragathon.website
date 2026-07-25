@@ -1,7 +1,5 @@
 # Dependencies
-node_modules/
-frontend/node_modules/
-backend/node_modules/
+**/node_modules/
 
 # Build output
 frontend/dist/
@@ -13,9 +11,8 @@ backend/dist/
 frontend/.env
 backend/.env
 
-# Database (keep the folder, ignore the actual db file)
-backend/data/*.db
-backend/data/*.db-journal
+# Database files
+backend/data/*
 !backend/data/.gitkeep
 
 # Logs
