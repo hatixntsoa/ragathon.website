@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Build output
+frontend/dist/
+backend/dist/
+
+# Env files
+.env
+.env.local
+frontend/.env
+backend/.env
+
+# Database (keep the folder, ignore the actual db file)
+backend/data/*.db
+backend/data/*.db-journal
+!backend/data/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+
+# Docker
+docker/*.env
