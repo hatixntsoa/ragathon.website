@@ -16,7 +16,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border-light dark:border-border-dark bg-white/90 dark:bg-black/90 backdrop-blur">
+    <header className="sticky top-0 z-40 w-full border-b border-border-light bg-bg/90 backdrop-blur">
       <nav
         aria-label="Main navigation"
         className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6"
@@ -33,7 +33,7 @@ export default function Navbar() {
             <>
               <Link
                 to={user.role === "admin" ? "/admin" : "/dashboard"}
-                className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-md hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
+                className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-light dark:hover:bg-surface-dark"
               >
                 <LayoutDashboard size={16} aria-hidden="true" />
                 {t("nav.dashboard")}
@@ -41,7 +41,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-md border border-border-light dark:border-border-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
+                className="flex items-center gap-1.5 rounded-md border border-border-light px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-light dark:hover:bg-surface-dark"
               >
                 <LogOut size={16} aria-hidden="true" />
                 {t("nav.logout")}
@@ -51,7 +51,7 @@ export default function Navbar() {
             <>
               <Link
                 to="/login"
-                className="text-sm font-semibold px-4 py-2 rounded-md bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-opacity"
+                className="rounded-md bg-black px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 dark:bg-white dark:text-black"
               >
                 {t("nav.login")}
               </Link>

@@ -9,7 +9,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 
 export default function App() {
   return (
-    <div className="flex min-h-screen flex-col bg-white dark:bg-black text-black dark:text-white">
+    <div className="flex min-h-screen flex-col bg-bg text-fg">
       <Navbar />
       <div className="flex-1">
         <Routes>

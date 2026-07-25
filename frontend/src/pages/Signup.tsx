@@ -73,7 +73,7 @@ export default function Signup() {
         </div>
 
         {error && (
-          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="text-sm text-danger">
             {error}
           </p>
         )}
@@ -81,13 +81,13 @@ export default function Signup() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md bg-black text-white dark:bg-white dark:text-black py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="btn-primary w-full"
         >
           {t("auth.signup_button")}
         </button>
       </form>
 
-      <p className="mt-6 text-sm text-black/60 dark:text-white/60">
+      <p className="mt-6 text-sm text-muted">
         {t("auth.have_account")}{" "}
         <Link to="/login" className="font-semibold text-accent">
           {t("auth.switch_to_login")}

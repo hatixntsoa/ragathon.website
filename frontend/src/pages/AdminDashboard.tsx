@@ -85,7 +85,7 @@ export default function AdminDashboard() {
             type="button"
             onClick={applyDuration}
             disabled={busy}
-            className="rounded-md border border-border-light dark:border-border-dark px-4 py-2 text-sm font-semibold hover:bg-surface-light dark:hover:bg-surface-dark transition-colors disabled:opacity-50"
+            className="rounded-md border border-border-light px-4 py-2 text-sm font-semibold transition-colors hover:bg-surface-light dark:hover:bg-surface-dark disabled:opacity-50"
           >
             {t("admin.timer_apply")}
           </button>
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
             type="button"
             onClick={start}
             disabled={busy}
-            className="inline-flex items-center gap-2 rounded-md bg-black text-white dark:bg-white dark:text-black px-4 py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="btn-primary"
           >
             <Play size={16} aria-hidden="true" />
             {t("admin.timer_start")}
@@ -105,7 +105,7 @@ export default function AdminDashboard() {
             type="button"
             onClick={pause}
             disabled={busy}
-            className="inline-flex items-center gap-2 rounded-md border border-border-light dark:border-border-dark px-4 py-2.5 text-sm font-semibold hover:bg-surface-light dark:hover:bg-surface-dark transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-md border border-border-light px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-surface-light dark:hover:bg-surface-dark disabled:opacity-50"
           >
             <Pause size={16} aria-hidden="true" />
             {t("admin.timer_pause")}
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
             type="button"
             onClick={reset}
             disabled={busy}
-            className="inline-flex items-center gap-2 rounded-md border border-border-light dark:border-border-dark px-4 py-2.5 text-sm font-semibold hover:bg-surface-light dark:hover:bg-surface-dark transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-md border border-border-light px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-surface-light dark:hover:bg-surface-dark disabled:opacity-50"
           >
             <RotateCcw size={16} aria-hidden="true" />
             {t("admin.timer_reset")}
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
         </div>
 
         {timer && (
-          <p className="text-sm text-black/50 dark:text-white/50">
+          <p className="text-sm text-muted">
             Status: <span className="font-semibold">{timer.status}</span> &middot; Remaining:{" "}
             <span className="font-mono">{Math.round(timer.remaining_ms / 1000)}s</span>
           </p>
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
           <button
             type="button"
             onClick={exportCsv}
-            className="inline-flex items-center gap-2 rounded-md border border-border-light dark:border-border-dark px-4 py-2.5 text-sm font-semibold hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
+            className="inline-flex items-center gap-2 rounded-md border border-border-light px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-surface-light dark:hover:bg-surface-dark"
           >
             <FileSpreadsheet size={16} aria-hidden="true" />
             {t("admin.export_leaderboard")}
@@ -143,7 +143,7 @@ export default function AdminDashboard() {
           <button
             type="button"
             onClick={exportPdf}
-            className="inline-flex items-center gap-2 rounded-md border border-border-light dark:border-border-dark px-4 py-2.5 text-sm font-semibold hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
+            className="inline-flex items-center gap-2 rounded-md border border-border-light px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-surface-light dark:hover:bg-surface-dark"
           >
             <FileText size={16} aria-hidden="true" />
             {t("admin.export_report")}
@@ -151,7 +151,7 @@ export default function AdminDashboard() {
           <button
             type="button"
             onClick={exportDb}
-            className="inline-flex items-center gap-2 rounded-md border border-border-light dark:border-border-dark px-4 py-2.5 text-sm font-semibold hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
+            className="inline-flex items-center gap-2 rounded-md border border-border-light px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-surface-light dark:hover:bg-surface-dark"
           >
             <Database size={16} aria-hidden="true" />
             {t("admin.export_database")}
@@ -165,16 +165,16 @@ export default function AdminDashboard() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-border-light dark:border-border-dark">
-                <th scope="col" className="py-2 pr-4 text-xs font-semibold uppercase tracking-wide text-black/50 dark:text-white/50">
+                <th scope="col" className="py-2 pr-4 text-xs font-semibold uppercase tracking-wide text-muted">
                   {t("admin.user_name")}
                 </th>
-                <th scope="col" className="py-2 pr-4 text-xs font-semibold uppercase tracking-wide text-black/50 dark:text-white/50">
+                <th scope="col" className="py-2 pr-4 text-xs font-semibold uppercase tracking-wide text-muted">
                   {t("admin.user_email")}
                 </th>
-                <th scope="col" className="py-2 pr-4 text-xs font-semibold uppercase tracking-wide text-black/50 dark:text-white/50">
+                <th scope="col" className="py-2 pr-4 text-xs font-semibold uppercase tracking-wide text-muted">
                   {t("admin.user_role")}
                 </th>
-                <th scope="col" className="py-2 text-xs font-semibold uppercase tracking-wide text-black/50 dark:text-white/50">
+                <th scope="col" className="py-2 text-xs font-semibold uppercase tracking-wide text-muted">
                   {t("admin.user_submissions")}
                 </th>
               </tr>
@@ -183,9 +183,9 @@ export default function AdminDashboard() {
               {users.map((u) => (
                 <tr key={u.id} className="border-b border-border-light dark:border-border-dark last:border-0">
                   <td className="py-3 pr-4 text-sm font-medium">{u.name}</td>
-                  <td className="py-3 pr-4 text-sm text-black/60 dark:text-white/60">{u.email}</td>
+                  <td className="py-3 pr-4 text-sm text-muted">{u.email}</td>
                   <td className="py-3 pr-4 text-sm">
-                    <span className="rounded-full bg-surface-light dark:bg-surface-dark px-2 py-0.5 text-xs font-semibold">
+                    <span className="pill pill-accent px-2 py-0.5">
                       {u.role}
                     </span>
                   </td>
@@ -198,7 +198,7 @@ export default function AdminDashboard() {
             <button
               type="button"
               onClick={loadUsers}
-              className="inline-flex items-center gap-2 text-xs font-semibold text-accent"
+              className="btn-secondary px-3 py-1.5 text-xs"
             >
               <Download size={14} aria-hidden="true" />
               Refresh

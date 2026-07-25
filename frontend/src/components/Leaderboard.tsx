@@ -14,7 +14,7 @@ export default function Leaderboard({ entries, limit, showEmail }: LeaderboardPr
 
   if (rows.length === 0) {
     return (
-      <p className="text-sm text-black/50 dark:text-white/50 py-6 text-center border border-dashed border-border-light dark:border-border-dark rounded-lg">
+      <p className="rounded-lg border border-dashed border-border-light py-6 text-center text-sm text-muted">
         {t("landing.leaderboard_empty")}
       </p>
     );
@@ -24,13 +24,13 @@ export default function Leaderboard({ entries, limit, showEmail }: LeaderboardPr
     <table className="w-full text-left border-collapse" role="table">
       <thead>
         <tr className="border-b border-border-light dark:border-border-dark">
-          <th scope="col" className="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-black/50 dark:text-white/50 w-16">
+          <th scope="col" className="w-16 py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-muted">
             {t("landing.rank")}
           </th>
-          <th scope="col" className="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-black/50 dark:text-white/50">
+          <th scope="col" className="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-muted">
             {t("landing.participant")}
           </th>
-          <th scope="col" className="py-3 text-xs font-semibold uppercase tracking-wide text-black/50 dark:text-white/50 text-right">
+          <th scope="col" className="py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">
             {t("landing.score")}
           </th>
         </tr>
@@ -44,7 +44,7 @@ export default function Leaderboard({ entries, limit, showEmail }: LeaderboardPr
             <td className="py-3 pr-4 text-sm font-medium">
               {entry.name}
               {showEmail && entry.email && (
-                <span className="block text-xs text-black/40 dark:text-white/40">{entry.email}</span>
+                <span className="block text-xs text-subtle">{entry.email}</span>
               )}
             </td>
             <td className="py-3 text-sm text-right tabular-nums font-semibold">

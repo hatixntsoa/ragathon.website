@@ -47,18 +47,18 @@ export default function Timer() {
 
   if (!state || state.status === "stopped") {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-border-light dark:border-border-dark px-4 py-3">
-        <Clock size={18} className="text-black/40 dark:text-white/40" aria-hidden="true" />
-        <span className="text-sm text-black/50 dark:text-white/50">{t("dashboard.timer_stopped")}</span>
+      <div className="flex items-center gap-2 rounded-lg border border-border-light px-4 py-3">
+        <Clock size={18} className="text-subtle" aria-hidden="true" />
+        <span className="text-sm text-muted">{t("dashboard.timer_stopped")}</span>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-border-light dark:border-border-dark px-4 py-3">
-      <Clock size={18} className={state.status === "running" ? "text-accent" : "text-black/40 dark:text-white/40"} aria-hidden="true" />
+    <div className="flex items-center gap-3 rounded-lg border border-border-light px-4 py-3">
+      <Clock size={18} className={state.status === "running" ? "text-accent" : "text-subtle"} aria-hidden="true" />
       <div>
-        <p className="text-xs uppercase tracking-wide text-black/50 dark:text-white/50">
+        <p className="text-xs uppercase tracking-wide text-muted">
           {t("dashboard.timer_title")}
         </p>
         <p
@@ -70,7 +70,7 @@ export default function Timer() {
         </p>
       </div>
       {state.status === "paused" && (
-        <span className="ml-2 text-xs font-semibold rounded-full bg-surface-light dark:bg-surface-dark px-2 py-1">
+        <span className="pill ml-2">
           {t("admin.timer_pause")}
         </span>
       )}

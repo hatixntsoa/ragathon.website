@@ -40,20 +40,20 @@ export default function LandingPage() {
               RAGATHON &middot; ragathon.ilaikoto.com
             </p> */}
             <h1 className="max-w-3xl">{t("landing.hero_title")}</h1>
-            <p className="mt-6 max-w-xl text-black/70 dark:text-white/70">
+            <p className="mt-6 max-w-xl text-fg/70">
               {t("landing.hero_subtitle")}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link
                 to={user ? "/dashboard" : "/login"}
-                className="inline-flex items-center gap-2 rounded-md bg-black text-white dark:bg-white dark:text-black px-5 py-3 text-sm font-semibold hover:opacity-90 transition-opacity"
+                className="btn-primary px-5 py-3"
               >
                 {t("landing.cta_primary")}
                 <ArrowRight size={16} aria-hidden="true" />
               </Link>
               <a
                 href="#how-it-works"
-                className="text-sm font-semibold text-black/70 dark:text-white/70 hover:text-black dark:hover:text-white transition-colors"
+                className="text-sm font-semibold text-fg/70 hover:text-accent transition-colors"
               >
                 {t("landing.cta_secondary")}
               </a>
@@ -62,7 +62,7 @@ export default function LandingPage() {
 
           <div className="lg:col-span-4 lg:justify-self-end w-full">
             <div className="rounded-xl border border-border-light dark:border-border-dark p-6 bg-surface-light dark:bg-surface-dark">
-              <p className="text-xs font-semibold uppercase tracking-wide text-black/50 dark:text-white/50 mb-4">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted">
                 {t("landing.leaderboard_title")}
               </p>
               <Leaderboard entries={leaderboard} limit={3} />
@@ -77,11 +77,11 @@ export default function LandingPage() {
           <h2 className="mb-12">{t("landing.steps_title")}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-border-light dark:bg-border-dark border border-border-light dark:border-border-dark">
             {STEPS.map((step, i) => (
-              <div key={step.titleKey} className="bg-white dark:bg-black p-8">
-                <span className="text-xs font-mono text-black/40 dark:text-white/40">0{i + 1}</span>
+              <div key={step.titleKey} className="bg-bg p-8">
+                <span className="text-xs font-mono text-subtle">0{i + 1}</span>
                 <step.icon size={24} className="text-accent mt-4 mb-4" aria-hidden="true" />
                 <h3 className="text-lg font-bold mb-2">{t(`landing.${step.titleKey}`)}</h3>
-                <p className="text-sm text-black/60 dark:text-white/60">{t(`landing.${step.descKey}`)}</p>
+                <p className="text-sm text-muted">{t(`landing.${step.descKey}`)}</p>
               </div>
             ))}
           </div>
@@ -94,7 +94,7 @@ export default function LandingPage() {
           <div className="flex items-end justify-between mb-8">
             <div>
               <h2>{t("landing.leaderboard_title")}</h2>
-              <p className="text-black/60 dark:text-white/60 mt-2">{t("landing.leaderboard_subtitle")}</p>
+              <p className="mt-2 text-muted">{t("landing.leaderboard_subtitle")}</p>
             </div>
           </div>
           <Leaderboard entries={leaderboard} limit={3} />

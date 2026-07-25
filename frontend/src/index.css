@@ -3,16 +3,39 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-bg: 255 255 255;
+    --color-fg: 10 10 10;
+    --color-muted: 87 96 110;
+    --color-subtle: 136 146 176;
+    --color-surface: 243 244 246;
+    --color-border: 229 231 235;
+    --color-accent: 29 155 240;
+    --color-accent-fg: 255 255 255;
+    --color-success: 22 163 74;
+    --color-danger: 220 38 38;
+  }
+
+  .dark {
+    --color-bg: 0 0 0;
+    --color-fg: 245 245 245;
+    --color-muted: 168 176 196;
+    --color-subtle: 132 146 166;
+    --color-surface: 17 17 17;
+    --color-border: 51 51 51;
+    --color-accent: 56 189 248;
+    --color-accent-fg: 7 11 21;
+    --color-success: 74 222 128;
+    --color-danger: 248 113 113;
+  }
+
   html {
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", Roboto, sans-serif;
   }
 
   body {
-    background-color: #ffffff;
-  }
-
-  .dark body {
-    background-color: #000000;
+    background-color: rgb(var(--color-bg));
+    color: rgb(var(--color-fg));
   }
 
   h1 {
@@ -33,6 +56,24 @@
   li {
     font-size: 16px;
     line-height: 1.6;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-accent-fg transition-opacity hover:opacity-90 disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-accent/40 px-4 py-2.5 text-sm font-semibold text-accent hover:bg-accent/10 transition-colors disabled:opacity-50;
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-light px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted;
+  }
+
+  .pill-accent {
+    @apply border-accent/40 bg-accent/15 text-accent;
   }
 }
 

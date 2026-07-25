@@ -9,12 +9,12 @@ export default function ThemeSwitcher() {
       type="button"
       onClick={toggleTheme}
       aria-label={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
-      className="flex items-center justify-center rounded-full border border-border-light dark:border-border-dark w-8 h-8 hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
+      className="flex h-8 w-8 items-center justify-center rounded-full border border-border-light hover:bg-surface-light transition-colors"
     >
       {theme === "light" ? (
-        <Moon size={14} className="text-black/60" aria-hidden="true" />
+        <Moon size={14} className="text-muted" aria-hidden="true" />
       ) : (
-        <Sun size={14} className="text-white/70" aria-hidden="true" />
+        <Sun size={14} className="text-muted" aria-hidden="true" />
       )}
     </button>
   );

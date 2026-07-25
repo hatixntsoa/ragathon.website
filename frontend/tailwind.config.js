@@ -5,15 +5,22 @@ export default {
   theme: {
     extend: {
       colors: {
+        bg: "rgb(var(--color-bg) / <alpha-value>)",
+        fg: "rgb(var(--color-fg) / <alpha-value>)",
+        muted: "rgb(var(--color-muted) / <alpha-value>)",
+        subtle: "rgb(var(--color-subtle) / <alpha-value>)",
         surface: {
-          light: "#F3F4F6",
-          dark: "#111111",
+          light: "rgb(var(--color-surface) / <alpha-value>)",
+          dark: "rgb(var(--color-surface) / <alpha-value>)",
         },
         border: {
-          light: "#E5E7EB",
-          dark: "#333333",
+          light: "rgb(var(--color-border) / <alpha-value>)",
+          dark: "rgb(var(--color-border) / <alpha-value>)",
         },
-        accent: "#1D9BF0",
+        accent: "rgb(var(--color-accent) / <alpha-value>)",
+        "accent-fg": "rgb(var(--color-accent-fg) / <alpha-value>)",
+        success: "rgb(var(--color-success) / <alpha-value>)",
+        danger: "rgb(var(--color-danger) / <alpha-value>)",
       },
       fontFamily: {
         sans: [

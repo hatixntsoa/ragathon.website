@@ -27,15 +27,15 @@ interface MyResponse {
 function StatusBadge({ status }: { status: Submission["status"] }) {
   const { t } = useTranslation();
   const map = {
-    pending: { icon: Clock3, cls: "text-black/50 dark:text-white/50", label: t("dashboard.status_pending") },
+    pending: { icon: Clock3, cls: "text-subtle", label: t("dashboard.status_pending") },
     evaluating: { icon: Loader2, cls: "text-accent animate-spin", label: t("dashboard.status_evaluating") },
-    scored: { icon: CheckCircle2, cls: "text-green-600 dark:text-green-400", label: t("dashboard.status_scored") },
-    failed: { icon: XCircle, cls: "text-red-600 dark:text-red-400", label: t("dashboard.status_failed") },
+    scored: { icon: CheckCircle2, cls: "text-success", label: t("dashboard.status_scored") },
+    failed: { icon: XCircle, cls: "text-danger", label: t("dashboard.status_failed") },
   } as const;
   const entry = map[status];
   const Icon = entry.icon;
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-border-light dark:border-border-dark px-3 py-1 text-sm font-medium uppercase tracking-wide">
+    <span className="pill text-sm">
       <Icon size={14} className={entry.cls} aria-hidden="true" />
       {entry.label}
     </span>
@@ -106,17 +106,17 @@ export default function ParticipantDashboard() {
         <section className="rounded-xl border border-border-light dark:border-border-dark p-8">
           <div className="mb-8 flex items-center justify-between">
             <Database size={24} className="text-accent" aria-hidden="true" />
-            <span className="text-xs uppercase tracking-[0.2em] text-black/50 dark:text-white/50">
+            <span className="text-xs uppercase tracking-[0.2em] text-muted">
               {t("dashboard.data_label")}
             </span>
           </div>
           <h2 className="text-lg font-bold mb-1">{t("dashboard.data_access_title")}</h2>
-          <p className="text-sm text-black/60 dark:text-white/60 mb-8">{t("dashboard.data_access_desc")}</p>
+          <p className="mb-8 text-sm text-muted">{t("dashboard.data_access_desc")}</p>
           <a
             href={DATASET_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border-light dark:border-border-dark px-4 py-3 text-sm font-semibold hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border-light px-4 py-3 text-sm font-semibold transition-colors hover:bg-surface-light dark:hover:bg-surface-dark"
           >
             {t("dashboard.data_access_link")}
             <ExternalLink size={16} aria-hidden="true" />
@@ -126,17 +126,17 @@ export default function ParticipantDashboard() {
         <section className="rounded-xl border border-border-light dark:border-border-dark p-8">
           <div className="mb-8 flex items-center justify-between">
             <Code2 size={24} className="text-accent" aria-hidden="true" />
-            <span className="text-xs uppercase tracking-[0.2em] text-black/50 dark:text-white/50">
+            <span className="text-xs uppercase tracking-[0.2em] text-muted">
               {t("dashboard.build_label")}
             </span>
           </div>
           <h2 className="text-lg font-bold mb-2">{t("dashboard.kaggle_title")}</h2>
-          <p className="text-sm text-black/60 dark:text-white/60 mb-8">{t("dashboard.kaggle_desc")}</p>
+          <p className="mb-8 text-sm text-muted">{t("dashboard.kaggle_desc")}</p>
           <a
             href={KAGGLE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border-light dark:border-border-dark px-4 py-3 text-sm font-semibold hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border-light px-4 py-3 text-sm font-semibold transition-colors hover:bg-surface-light dark:hover:bg-surface-dark"
           >
             {t("dashboard.kaggle_link")}
             <ExternalLink size={16} aria-hidden="true" />
@@ -146,7 +146,7 @@ export default function ParticipantDashboard() {
         <section className="rounded-xl border border-border-light dark:border-border-dark p-8">
           <div className="mb-8 flex items-center justify-between">
             <UploadCloud size={24} className="text-accent" aria-hidden="true" />
-            <span className="text-xs uppercase tracking-[0.2em] text-black/50 dark:text-white/50">
+            <span className="text-xs uppercase tracking-[0.2em] text-muted">
               {t("dashboard.status_label")}
             </span>
           </div>
@@ -155,7 +155,7 @@ export default function ParticipantDashboard() {
             <>
               <StatusBadge status={latestSubmission.status} />
               {latestSubmission.score !== null && (
-                <p className="mt-4 text-sm text-black/60 dark:text-white/60">
+                <p className="mt-4 text-sm text-muted">
                   {t("landing.score")}: {latestSubmission.score.toFixed(4)}
                 </p>
               )}
@@ -163,7 +163,7 @@ export default function ParticipantDashboard() {
           ) : (
             <>
               <StatusBadge status="pending" />
-              <p className="mt-4 text-sm text-black/60 dark:text-white/60">{t("dashboard.no_submission_yet")}</p>
+              <p className="mt-4 text-sm text-muted">{t("dashboard.no_submission_yet")}</p>
             </>
           )}
         </section>
@@ -171,7 +171,7 @@ export default function ParticipantDashboard() {
 
       <section className="rounded-xl border border-border-light dark:border-border-dark p-8 mb-10">
         <h2 className="text-lg font-bold mb-1">{t("dashboard.submission_title")}</h2>
-        <p className="text-sm text-black/60 dark:text-white/60 mb-6">{t("dashboard.submission_desc")}</p>
+        <p className="mb-6 text-sm text-muted">{t("dashboard.submission_desc")}</p>
 
         <div
           onDragOver={(e) => {
@@ -185,9 +185,9 @@ export default function ParticipantDashboard() {
           }`}
         >
           <label className="flex cursor-pointer flex-col items-center gap-2">
-            <FileBox size={28} className={modelFile ? "text-accent" : "text-black/40 dark:text-white/40"} aria-hidden="true" />
+            <FileBox size={28} className={modelFile ? "text-accent" : "text-subtle"} aria-hidden="true" />
             <span className="text-lg font-semibold">{modelFile ? modelFile.name : t("dashboard.submission_model")}</span>
-            <span className="text-sm text-black/50 dark:text-white/50">{t("dashboard.drag_or_browse")}</span>
+            <span className="text-sm text-muted">{t("dashboard.drag_or_browse")}</span>
             <input
               type="file"
               accept=".pkl"
@@ -201,12 +201,12 @@ export default function ParticipantDashboard() {
           type="button"
           disabled={!modelFile || uploading}
           onClick={handleSubmit}
-          className="mt-8 rounded-md bg-blue-300 px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+          className="btn-primary mt-8 px-6 py-3"
         >
           {uploading ? t("dashboard.submission_uploading") : t("dashboard.submission_button")}
         </button>
 
-        {message && <p className="mt-4 text-sm text-black/70 dark:text-white/70">{message}</p>}
+        {message && <p className="mt-4 text-sm text-fg/70">{message}</p>}
       </section>
     </main>
   );
