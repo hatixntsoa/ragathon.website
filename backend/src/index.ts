@@ -17,6 +17,9 @@ const PORT = Number(process.env.PORT) || 4000;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
 
 initDb();
+// initialize logger early so log basename is stable for this run
+import { logAction } from "./logger";
+logAction("server.start", { port: PORT });
 
 const app = express();
 app.use(cors({ origin: CORS_ORIGIN, credentials: true }));

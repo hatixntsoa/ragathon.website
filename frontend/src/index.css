@@ -10,7 +10,7 @@
     --color-subtle: 136 146 176;
     --color-surface: 243 244 246;
     --color-border: 229 231 235;
-    --color-accent: 29 155 240;
+    --color-accent: 1 119 252;
     --color-accent-fg: 255 255 255;
     --color-success: 22 163 74;
     --color-danger: 220 38 38;
@@ -23,8 +23,8 @@
     --color-subtle: 132 146 166;
     --color-surface: 17 17 17;
     --color-border: 51 51 51;
-    --color-accent: 56 189 248;
-    --color-accent-fg: 7 11 21;
+    --color-accent: 1 119 252;
+    --color-accent-fg: 255 255 255;
     --color-success: 74 222 128;
     --color-danger: 248 113 113;
   }
@@ -36,6 +36,23 @@
   body {
     background-color: rgb(var(--color-bg));
     color: rgb(var(--color-fg));
+  }
+
+  /* form inputs surface consistent with design and dark mode */
+  input, textarea, select {
+    background-color: rgb(var(--color-surface));
+    border: 1px solid rgb(var(--color-border));
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* Ensure inputs show the dark surface color even when utility classes like bg-transparent exist */
+  .dark input, .dark textarea, .dark select {
+    background-color: rgb(var(--color-surface)) !important;
+    border: 1px solid rgb(var(--color-border)) !important;
+    color: rgb(var(--color-fg));
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
   }
 
   h1 {
@@ -86,5 +103,16 @@
   .section-padding-lg {
     padding-top: 120px;
     padding-bottom: 120px;
+  }
+
+  /* simple slide-up animation used on landing page sections */
+  .landing-section {
+    transform: translateY(30px);
+    opacity: 0;
+    transition: all 0.6s cubic-bezier(.2,.9,.3,1);
+  }
+  .landing-section.visible {
+    transform: translateY(0);
+    opacity: 1;
   }
 }

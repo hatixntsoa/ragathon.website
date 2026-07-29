@@ -1,19 +1,30 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LogOut, LayoutDashboard } from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher";
-import ThemeSwitcher from "./ThemeSwitcher";
+// import ThemeSwitcher from "./ThemeSwitcher";
+import Timer from "./Timer";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   function handleLogout() {
     logout();
     navigate("/");
   }
+
+  const adminTabs = [
+    ["#users", t("admin.nav_users")],
+    ["#submissions", t("admin.nav_submissions")],
+    ["#timer", t("admin.nav_timer")],
+    ["#export", t("admin.nav_export")],
+    ["#leaderboard", t("admin.nav_leaderboard")],
+    ["#settings", t("admin.nav_settings")],
+  ];
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border-light bg-bg/90 backdrop-blur">
@@ -21,23 +32,36 @@ export default function Navbar() {
         aria-label="Main navigation"
         className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6"
       >
-        <Link to="/" className="flex items-center gap-2" aria-label="RAGATHON home">
-          <span className="text-lg font-extrabold tracking-tight">RAGATHON</span>
-        </Link>
+        <div className="flex items-center gap-6">
+          <Link to="/" className="flex items-center gap-2" aria-label="RAGATHON home">
+            <span className="text-lg font-extrabold tracking-tight">RAGATHON</span>
+          </Link>
+
+          {user && user.role === "admin" && (
+            <div className="hidden md:flex items-center gap-3">
+              {adminTabs.map(([hash,label]) => {
+                const isActive = location.pathname === "/admin" && location.hash === String(hash);
+                return (
+                  <Link
+                    key={String(hash)}
+                    to={`/admin${String(hash)}`}
+                    className={`text-sm font-medium px-2 py-1 rounded ${isActive ? 'text-accent' : 'text-muted'} hover:text-accent transition-colors`}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center gap-3">
+          <Timer compact />
           <LanguageSwitcher />
-          <ThemeSwitcher />
+          {/* <ThemeSwitcher /> */}
 
           {user ? (
             <>
-              <Link
-                to={user.role === "admin" ? "/admin" : "/dashboard"}
-                className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-light dark:hover:bg-surface-dark"
-              >
-                <LayoutDashboard size={16} aria-hidden="true" />
-                {t("nav.dashboard")}
-              </Link>
               <button
                 type="button"
                 onClick={handleLogout}

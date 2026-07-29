@@ -12,8 +12,9 @@ import {
   Loader2,
 } from "lucide-react";
 import Timer from "../components/Timer";
+import ActionCard from "../components/ActionCard";
 import { useAuth } from "../context/AuthContext";
-import { api } from "../lib/api";
+import { apiClient as api } from "../lib/api_client";
 import { getSocket } from "../lib/socket";
 import { Submission } from "../types";
 
@@ -73,7 +74,7 @@ export default function ParticipantDashboard() {
     e.preventDefault();
     setDragging(false);
     for (const file of Array.from(e.dataTransfer.files)) {
-      if (file.name.endsWith(".pkl")) setModelFile(file);
+      if (file.name.endsWith(".json")) setModelFile(file);
     }
   }
 
@@ -84,7 +85,9 @@ export default function ParticipantDashboard() {
     try {
       const formData = new FormData();
       formData.append("model", modelFile);
-      await api.post("/submissions", formData);
+      // use submission helper (frontend/src/lib/submissionClient.ts) to make the submission
+      const { submitResponseFile } = await import("../lib/submissionClient");
+      await submitResponseFile(modelFile);
       setMessage(t("dashboard.submission_success"));
       setModelFile(null);
       loadSubmissions();
@@ -99,74 +102,45 @@ export default function ParticipantDashboard() {
     <main className="mx-auto max-w-5xl px-6 py-16">
       <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <h1 className="text-3xl font-extrabold">{t("dashboard.welcome_back", { name: user?.name ?? "Participant" })}</h1>
-        <Timer />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-10">
-        <section className="rounded-xl border border-border-light dark:border-border-dark p-8">
-          <div className="mb-8 flex items-center justify-between">
-            <Database size={24} className="text-accent" aria-hidden="true" />
-            <span className="text-xs uppercase tracking-[0.2em] text-muted">
-              {t("dashboard.data_label")}
-            </span>
-          </div>
-          <h2 className="text-lg font-bold mb-1">{t("dashboard.data_access_title")}</h2>
-          <p className="mb-8 text-sm text-muted">{t("dashboard.data_access_desc")}</p>
-          <a
-            href={DATASET_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border-light px-4 py-3 text-sm font-semibold transition-colors hover:bg-surface-light dark:hover:bg-surface-dark"
-          >
-            {t("dashboard.data_access_link")}
-            <ExternalLink size={16} aria-hidden="true" />
-          </a>
-        </section>
+        <ActionCard
+          icon={Database}
+          label={t("dashboard.data_label")}
+          title={t("dashboard.data_access_title")}
+          description={t("dashboard.data_access_desc")}
+          href={DATASET_URL}
+        />
 
-        <section className="rounded-xl border border-border-light dark:border-border-dark p-8">
-          <div className="mb-8 flex items-center justify-between">
-            <Code2 size={24} className="text-accent" aria-hidden="true" />
-            <span className="text-xs uppercase tracking-[0.2em] text-muted">
-              {t("dashboard.build_label")}
-            </span>
-          </div>
-          <h2 className="text-lg font-bold mb-2">{t("dashboard.kaggle_title")}</h2>
-          <p className="mb-8 text-sm text-muted">{t("dashboard.kaggle_desc")}</p>
-          <a
-            href={KAGGLE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border-light px-4 py-3 text-sm font-semibold transition-colors hover:bg-surface-light dark:hover:bg-surface-dark"
-          >
-            {t("dashboard.kaggle_link")}
-            <ExternalLink size={16} aria-hidden="true" />
-          </a>
-        </section>
+        <ActionCard
+          icon={Code2}
+          label={t("dashboard.build_label")}
+          title={t("dashboard.kaggle_title")}
+          description={t("dashboard.kaggle_desc")}
+          href={KAGGLE_URL}
+        />
 
-        <section className="rounded-xl border border-border-light dark:border-border-dark p-8">
-          <div className="mb-8 flex items-center justify-between">
-            <UploadCloud size={24} className="text-accent" aria-hidden="true" />
-            <span className="text-xs uppercase tracking-[0.2em] text-muted">
-              {t("dashboard.status_label")}
-            </span>
-          </div>
-          <h2 className="text-lg font-bold mb-5">{t("dashboard.submission_status_title")}</h2>
-          {latestSubmission ? (
-            <>
-              <StatusBadge status={latestSubmission.status} />
-              {latestSubmission.score !== null && (
-                <p className="mt-4 text-sm text-muted">
-                  {t("landing.score")}: {latestSubmission.score.toFixed(4)}
-                </p>
-              )}
-            </>
-          ) : (
-            <>
-              <StatusBadge status="pending" />
-              <p className="mt-4 text-sm text-muted">{t("dashboard.no_submission_yet")}</p>
-            </>
-          )}
-        </section>
+        <ActionCard
+          icon={UploadCloud}
+          label={t("dashboard.status_label")}
+          title={t("dashboard.submission_status_title")}
+          description={
+            latestSubmission ? (
+              <>
+                <StatusBadge status={latestSubmission.status} />
+                {latestSubmission.score !== null && (
+                  <p className="mt-4 text-sm text-muted">{t("landing.score")} : {latestSubmission.score.toFixed(4)}</p>
+                )}
+              </>
+            ) : (
+              <>
+                <StatusBadge status="pending" />
+                <p className="mt-4 text-sm text-muted">{t("dashboard.no_submission_yet")}</p>
+              </>
+            ) as any
+          }
+        />
       </div>
 
       <section className="rounded-xl border border-border-light dark:border-border-dark p-8 mb-10">
@@ -190,7 +164,7 @@ export default function ParticipantDashboard() {
             <span className="text-sm text-muted">{t("dashboard.drag_or_browse")}</span>
             <input
               type="file"
-              accept=".pkl"
+              accept=".json"
               className="sr-only"
               onChange={(e) => setModelFile(e.target.files?.[0] || null)}
             />

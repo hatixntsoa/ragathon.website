@@ -1,103 +1,39 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Database, Code2, UploadCloud, Cpu, ArrowRight } from "lucide-react";
-import Leaderboard from "../components/Leaderboard";
-import { api } from "../lib/api";
-import { LeaderboardEntry } from "../types";
 import { useAuth } from "../context/AuthContext";
-
-interface LeaderboardResponse {
-  leaderboard: LeaderboardEntry[];
-}
-
-const STEPS = [
-  { icon: Database, titleKey: "step_1_title", descKey: "step_1_desc" },
-  { icon: Code2, titleKey: "step_2_title", descKey: "step_2_desc" },
-  { icon: UploadCloud, titleKey: "step_3_title", descKey: "step_3_desc" },
-  { icon: Cpu, titleKey: "step_4_title", descKey: "step_4_desc" },
-];
+import { useEffect } from "react";
 
 export default function LandingPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
-    api
-      .get<LeaderboardResponse>("/submissions/leaderboard")
-      .then((res) => setLeaderboard(res.leaderboard))
-      .catch(() => setLeaderboard([]));
+    const els = Array.from(document.querySelectorAll('.landing-section')) as HTMLElement[];
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    els.forEach(el => observer.observe(el));
+    return () => observer.disconnect();
   }, []);
 
   return (
     <main>
-      {/* Hero: asymmetric split layout, not centered */}
-      <section className="section-padding-lg border-b border-border-light dark:border-border-dark">
-        <div className="mx-auto max-w-6xl px-6 grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
-          <div className="lg:col-span-8">
-            {/* <p className="text-xs font-semibold uppercase tracking-widest text-accent mb-4">
-              RAGATHON &middot; ragathon.ilaikoto.com
-            </p> */}
-            <h1 className="max-w-3xl">{t("landing.hero_title")}</h1>
-            <p className="mt-6 max-w-xl text-fg/70">
-              {t("landing.hero_subtitle")}
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Link
-                to={user ? "/dashboard" : "/login"}
-                className="btn-primary px-5 py-3"
-              >
-                {t("landing.cta_primary")}
-                <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-              <a
-                href="#how-it-works"
-                className="text-sm font-semibold text-fg/70 hover:text-accent transition-colors"
-              >
-                {t("landing.cta_secondary")}
-              </a>
-            </div>
-          </div>
-
-          <div className="lg:col-span-4 lg:justify-self-end w-full">
-            <div className="rounded-xl border border-border-light dark:border-border-dark p-6 bg-surface-light dark:bg-surface-dark">
-              <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted">
-                {t("landing.leaderboard_title")}
-              </p>
-              <Leaderboard entries={leaderboard} limit={3} />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Steps: asymmetric 4-col grid */}
-      <section id="how-it-works" className="section-padding border-b border-border-light dark:border-border-dark">
+      <section className="section-padding-lg landing-section" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
         <div className="mx-auto max-w-6xl px-6">
-          <h2 className="mb-12">{t("landing.steps_title")}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-border-light dark:bg-border-dark border border-border-light dark:border-border-dark">
-            {STEPS.map((step, i) => (
-              <div key={step.titleKey} className="bg-bg p-8">
-                <span className="text-xs font-mono text-subtle">0{i + 1}</span>
-                <step.icon size={24} className="text-accent mt-4 mb-4" aria-hidden="true" />
-                <h3 className="text-lg font-bold mb-2">{t(`landing.${step.titleKey}`)}</h3>
-                <p className="text-sm text-muted">{t(`landing.${step.descKey}`)}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Full leaderboard preview section */}
-      <section className="section-padding">
-        <div className="mx-auto max-w-4xl px-6">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2>{t("landing.leaderboard_title")}</h2>
-              <p className="mt-2 text-muted">{t("landing.leaderboard_subtitle")}</p>
+          <div className="text-center">
+            <h1 className="max-w-3xl mx-auto">{t("landing.hero_title")}</h1>
+            <p className="mt-6 max-w-xl mx-auto text-fg/70">{t("landing.hero_subtitle")}</p>
+            <div className="mt-8 flex items-center justify-center">
+              <Link to={user ? "/dashboard" : "/login"} className="btn-primary px-8 py-4">
+                {t("landing.cta_primary")}
+              </Link>
             </div>
           </div>
-          <Leaderboard entries={leaderboard} limit={3} />
         </div>
       </section>
     </main>

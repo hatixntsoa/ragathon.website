@@ -40,5 +40,8 @@ export interface AdminUserRow {
   name: string;
   role: Role;
   created_at: string;
+  short_id?: string;
+  has_pending?: boolean;
+  plain_password?: string | null;
   submissions: { id: string; status: SubmissionStatus; score: number | null; submitted_at: string }[];
 }

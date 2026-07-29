@@ -9,6 +9,12 @@ function randomPassword(length = 20): string {
   return crypto.randomBytes(length).toString("base64").replace(/[^a-zA-Z0-9]/g, "").slice(0, length);
 }
 
+function randomHex(length = 20): string {
+  // length is hex chars count — generate length/2 bytes
+  const bytes = Math.ceil(length / 2);
+  return crypto.randomBytes(bytes).toString("hex").slice(0, length);
+}
+
 const DATA_DIR = path.join(__dirname, "..", "data");
 const DB_PATH = path.join(DATA_DIR, "ragathon.db");
 
@@ -51,7 +57,26 @@ export function initDb(): void {
       status TEXT NOT NULL DEFAULT 'stopped' CHECK(status IN ('stopped','running','paused')),
       last_update INTEGER NOT NULL DEFAULT 0
     );
+
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS pending_credentials (
+      user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      plain_password TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
+
+  // Ensure short_id column exists on users (4 hex chars), add unique index
+  const cols = db.prepare("PRAGMA table_info(users)").all();
+  const hasShort = cols.some((c:any) => c.name === 'short_id');
+  if (!hasShort) {
+    db.prepare("ALTER TABLE users ADD COLUMN short_id TEXT").run();
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_short_id ON users(short_id)").run();
+  }
 
   const timerRow = db.prepare("SELECT id FROM timer WHERE id = 1").get();
   if (!timerRow) {
@@ -63,25 +88,32 @@ export function initDb(): void {
 
   const adminRow = db.prepare("SELECT id FROM users WHERE email = ?").get("admin@ragathon.local");
   if (!adminRow) {
-    const passwordHash = bcrypt.hashSync("admin123", 10);
+    // generate a secure random 20-hex password for the default admin
+    const defaultPassword = randomHex(20);
+    const passwordHash = bcrypt.hashSync(defaultPassword, 10);
+    const adminId = uuidv4();
+    // generate a unique 4-hex short id
+    function genShort() {
+      return crypto.randomBytes(2).toString('hex').slice(0,4);
+    }
+    let shortId = genShort();
+    let attempts = 0;
+    while (db.prepare('SELECT id FROM users WHERE short_id = ?').get(shortId) && attempts < 10) {
+      shortId = genShort();
+      attempts++;
+    }
     db.prepare(
-      `INSERT INTO users (id, email, name, password_hash, role) VALUES (?, ?, ?, ?, 'admin')`
-    ).run(uuidv4(), "admin@ragathon.local", "Admin", passwordHash);
+      `INSERT INTO users (id, email, name, password_hash, role, short_id) VALUES (?, ?, ?, ?, 'admin', ?)`
+    ).run(adminId, "admin@ragathon.local", "Admin", passwordHash, shortId);
     // eslint-disable-next-line no-console
-    console.log("Seeded default admin -> admin@ragathon.local / admin123 (change this immediately)");
+    console.log(`Seeded default admin -> username: admin / email: admin@ragathon.local / password: ${defaultPassword} / short_id: ${shortId}`);
+    try {
+      // write into log as well so operator can find it in server logs
+      const { logAction } = require("./logger");
+      logAction("server.seed_admin", { userId: adminId, email: "admin@ragathon.local" });
+    } catch {}
   }
 
-  const participantCount = db.prepare("SELECT COUNT(*) AS c FROM users WHERE role = 'user'").get() as { c: number };
-  if (participantCount.c === 0) {
-    const names = ["Alice Rakoto", "Bruno Rasolofo", "Chloe Andria", "David Ravel", "Elina Rabe"];
-    console.log("Seeded 5 default participants (save these passwords, they are not recoverable):");
-    for (let i = 0; i < names.length; i++) {
-      const password = randomPassword(20);
-      const email = `participant${i + 1}@ragathon.local`;
-      db.prepare(
-        `INSERT INTO users (id, email, name, password_hash, role) VALUES (?, ?, ?, ?, 'user')`
-      ).run(uuidv4(), email, names[i], bcrypt.hashSync(password, 10));
-      console.log(`  ${email} / ${password}`);
-    }
-  }
+  // participant seeding removed: users will be provisioned via admin upload (excel) or manual creation
+  // Previously the code created dummy participants at first run; keeping the DB clean for real participants.
 }

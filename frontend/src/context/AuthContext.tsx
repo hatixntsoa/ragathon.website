@@ -1,11 +1,11 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { AuthUser } from "../types";
-import { api } from "../lib/api";
+import { apiClient as api } from "../lib/api_client";
 
 interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<AuthUser>;
+  login: (username: string, password: string) => Promise<AuthUser>;
   register: (name: string, email: string, password: string) => Promise<AuthUser>;
   logout: () => void;
 }
@@ -40,8 +40,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res.user;
   }
 
-  async function login(email: string, password: string) {
-    const res = await api.post<LoginResponse>("/auth/login", { email, password });
+  async function login(username: string, password: string) {
+    // send username field; backend will resolve email or name
+    const res = await api.post<LoginResponse>("/auth/login", { username, password });
     return persist(res);
   }
 

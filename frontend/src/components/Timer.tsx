@@ -12,7 +12,7 @@ function formatMs(ms: number): string {
   return [h, m, s].map((v) => String(v).padStart(2, "0")).join(":");
 }
 
-export default function Timer() {
+export default function Timer({ compact = false }: { compact?: boolean }) {
   const { t } = useTranslation();
   const [state, setState] = useState<TimerState | null>(null);
   const [displayMs, setDisplayMs] = useState<number>(0);
@@ -44,6 +44,24 @@ export default function Timer() {
     }, 250);
     return () => clearInterval(interval);
   }, [state]);
+
+  if (compact) {
+    if (!state || state.status === "stopped") {
+      return (
+        <div className="inline-flex items-center gap-2 rounded-md px-3 py-1 text-sm font-medium transition-colors hover:bg-accent/5">
+          <Clock size={14} className="text-accent" aria-hidden="true" />
+          <span className="text-fg text-sm">{t("dashboard.timer_stopped")}</span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="inline-flex items-center gap-2 rounded-md px-3 py-1 text-sm font-medium transition-colors hover:bg-accent/5" role="timer" aria-live="polite">
+        <Clock size={14} className={state.status === "running" ? "text-accent" : "text-subtle"} aria-hidden="true" />
+        <span className="text-fg font-semibold tabular-nums">{formatMs(displayMs)}</span>
+      </div>
+    );
+  }
 
   if (!state || state.status === "stopped") {
     return (

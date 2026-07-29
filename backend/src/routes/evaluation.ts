@@ -14,8 +14,11 @@ const router = Router();
  * scoring function so the rest of the platform (status flow, leaderboard,
  * exports) is fully wired end to end.
  */
+import { logAction } from "../logger";
+
 export function runEvaluation(submissionId: string): void {
   db.prepare("UPDATE submissions SET status = 'evaluating' WHERE id = ?").run(submissionId);
+  logAction("submission.evaluating", { submissionId });
 
   const delayMs = 4000 + Math.random() * 4000;
 
@@ -32,8 +35,11 @@ export function runEvaluation(submissionId: string): void {
          SET status = 'scored', train_score = ?, test_score = ?, score = ?, overfit_flag = ?
          WHERE id = ?`
       ).run(trainScore, testScore, testScore, overfit, submissionId);
-    } catch {
+
+      logAction("submission.scored", { submissionId, trainScore, testScore, score: testScore, overfit });
+    } catch (err) {
       db.prepare("UPDATE submissions SET status = 'failed' WHERE id = ?").run(submissionId);
+      logAction("submission.failed", { submissionId, error: String(err) });
     }
   }, delayMs);
 }

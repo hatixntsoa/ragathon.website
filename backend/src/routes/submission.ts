@@ -24,11 +24,12 @@ const upload = multer({
   storage,
   limits: { fileSize: 200 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    const allowed = [".pkl"];
+    // Accept JSON responses from the customized RAG system (per new spec)
+    const allowed = [".json"];
     if (allowed.includes(path.extname(file.originalname).toLowerCase())) {
       cb(null, true);
     } else {
-      cb(new Error("Only .pkl files are accepted"));
+      cb(new Error("Only .json files are accepted"));
     }
   },
 });
@@ -47,7 +48,7 @@ router.post(
     const modelFile = files?.model?.[0];
 
     if (!modelFile) {
-      return res.status(400).json({ error: "model.pkl is required" });
+      return res.status(400).json({ error: "response.json is required" });
     }
 
     const id = uuidv4();
@@ -58,7 +59,8 @@ router.post(
        VALUES (?, ?, ?, ?, 'pending')`
     ).run(id, userId, modelFile.filename, "");
 
-    // Queue evaluation asynchronously so the request returns immediately.
+    // Log submission and queue evaluation asynchronously so the request returns immediately.
+    import("../logger").then(({ logAction }) => logAction("submission.created", { submissionId: id, userId }));
     setImmediate(() => runEvaluation(id));
 
     return res.status(201).json({ submissionId: id, status: "pending" });
@@ -85,14 +87,14 @@ router.get("/leaderboard", (_req, res: Response) => {
        JOIN users u ON u.id = s.user_id
        WHERE s.status = 'scored'
        GROUP BY s.user_id
-       ORDER BY best_score DESC`
+       ORDER BY best_score DESC, LOWER(u.name) ASC`
     )
     .all();
 
   if (rows.length === 0) {
     // No scored submissions yet: fall back to registered participants, alphabetical.
     const fallback = db
-      .prepare(`SELECT name, NULL AS best_score FROM users WHERE role = 'user' ORDER BY name ASC`)
+      .prepare(`SELECT name, NULL AS best_score FROM users WHERE role = 'user' ORDER BY LOWER(name) ASC`)
       .all();
     return res.json({ leaderboard: fallback });
   }

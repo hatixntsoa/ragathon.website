@@ -1,8 +1,11 @@
 import { Router, Response } from "express";
 import path from "path";
+import fs from "fs";
 import PDFDocument from "pdfkit";
+import archiver from "archiver";
 import { db } from "../db";
 import { requireAuth, requireRole } from "../middleware/auth";
+import { getLogPath, getCurrentBasename } from "../logger";
 
 const router = Router();
 
@@ -20,7 +23,7 @@ function getFullLeaderboard(): LeaderboardRow[] {
        JOIN users u ON u.id = s.user_id
        WHERE s.status = 'scored'
        GROUP BY s.user_id
-       ORDER BY best_score DESC`
+       ORDER BY best_score DESC, LOWER(u.name) ASC`
     )
     .all() as LeaderboardRow[];
 }
@@ -93,6 +96,94 @@ router.get("/report.pdf", requireAuth, requireRole("admin"), (_req, res: Respons
 router.get("/database", requireAuth, requireRole("admin"), (_req, res: Response) => {
   const dbPath = path.join(__dirname, "..", "..", "data", "ragathon.db");
   return res.download(dbPath, "ragathon.db");
+});
+
+// GET /api/export/full  -> produces a zip containing ragathon_DB, the current run log, and generated PDF report
+router.get("/full", requireAuth, requireRole("admin"), async (_req, res: Response) => {
+  try {
+    const basename = getCurrentBasename();
+    const timestampSuffix = basename.replace(/^ragathon_/, "");
+    const pdfName = `ragathon_${timestampSuffix}.pdf`;
+    const dbPath = path.join(__dirname, "..", "..", "data", "ragathon.db");
+    const logPath = getLogPath();
+
+    // generate PDF into data folder using existing report generation code but writing to file
+    const pdfPath = path.join(__dirname, "..", "..", "data", pdfName);
+    await new Promise<void>((resolve, reject) => {
+      const doc = new PDFDocument({ margin: 50 });
+      const out = fs.createWriteStream(pdfPath);
+      doc.pipe(out);
+
+      const rows = getFullLeaderboard();
+
+      doc.fontSize(22).text("RAGATHON - Full Report", { align: "left" });
+      doc.moveDown(0.3);
+      doc.fontSize(10).fillColor("#555555").text(`Generated: ${new Date().toISOString()}`);
+      doc.moveDown(1.5);
+
+      doc.fillColor("#000000").fontSize(14).text("Final Rankings");
+      doc.moveDown(0.5);
+
+      const startX = 50;
+      let y = doc.y;
+      const colWidths = [50, 180, 220, 80];
+
+      doc.fontSize(11).font("Helvetica-Bold");
+      doc.text("Rank", startX, y, { width: colWidths[0] });
+      doc.text("Name", startX + colWidths[0], y, { width: colWidths[1] });
+      doc.text("Email", startX + colWidths[0] + colWidths[1], y, { width: colWidths[2] });
+      doc.text("Score", startX + colWidths[0] + colWidths[1] + colWidths[2], y, { width: colWidths[3] });
+      y += 20;
+      doc.moveTo(startX, y).lineTo(550, y).strokeColor("#cccccc").stroke();
+      y += 8;
+
+      doc.font("Helvetica");
+      rows.forEach((r, i) => {
+        if (y > 720) {
+          doc.addPage();
+          y = 50;
+        }
+        doc.text(String(i + 1), startX, y, { width: colWidths[0] });
+        doc.text(r.name, startX + colWidths[0], y, { width: colWidths[1] });
+        doc.text(r.email, startX + colWidths[0] + colWidths[1], y, { width: colWidths[2] });
+        doc.text(
+          r.best_score !== null ? r.best_score.toFixed(4) : "-",
+          startX + colWidths[0] + colWidths[1] + colWidths[2],
+          y,
+          { width: colWidths[3] }
+        );
+        y += 18;
+      });
+
+      doc.end();
+      out.on("finish", () => resolve());
+      out.on("error", (e) => reject(e));
+    });
+
+    // create the zip
+    const zipName = `ragathon_export_${timestampSuffix}.zip`;
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", `attachment; filename=${zipName}`);
+
+    const archive = archiver("zip", { zlib: { level: 9 } });
+    archive.on("error", (err) => {
+      // eslint-disable-next-line no-console
+      console.error("archiver error", err);
+      res.status(500).end();
+    });
+
+    archive.pipe(res);
+    archive.file(dbPath, { name: `ragathon_${timestampSuffix}.db` });
+    if (fs.existsSync(logPath)) archive.file(logPath, { name: path.basename(logPath) });
+    if (fs.existsSync(path.join(__dirname, "..", "..", "data", pdfName)))
+      archive.file(path.join(__dirname, "..", "..", "data", pdfName), { name: pdfName });
+
+    archive.finalize();
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err);
+    res.status(500).json({ error: "export_failed" });
+  }
 });
 
 export default router;
