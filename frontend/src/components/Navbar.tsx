@@ -2,29 +2,39 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LogOut, LayoutDashboard } from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher";
+import logo from "../assets/ragathon.logo.svg";
 // import ThemeSwitcher from "./ThemeSwitcher";
 import Timer from "./Timer";
 import { useAuth } from "../context/AuthContext";
+import { useAdminTab, AdminTab } from "../context/AdminTabContext";
 
 export default function Navbar() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { activeTab, setActiveTab } = useAdminTab();
 
   function handleLogout() {
     logout();
     navigate("/");
   }
 
-  const adminTabs = [
-    ["#users", t("admin.nav_users")],
-    ["#submissions", t("admin.nav_submissions")],
-    ["#timer", t("admin.nav_timer")],
-    ["#export", t("admin.nav_export")],
-    ["#leaderboard", t("admin.nav_leaderboard")],
-    ["#settings", t("admin.nav_settings")],
+  const adminTabs: [AdminTab, string][] = [
+    ["users", t("admin.nav_users")],
+    ["submissions", t("admin.nav_submissions")],
+    ["timer", t("admin.nav_timer")],
+    ["export", t("admin.nav_export")],
+    ["leaderboard", t("admin.nav_leaderboard")],
+    ["settings", t("admin.nav_settings")],
   ];
+
+  function goToAdminTab(tab: AdminTab) {
+    setActiveTab(tab);
+    if (location.pathname !== "/dashboard") {
+      navigate("/dashboard");
+    }
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border-light bg-bg/90 backdrop-blur">
@@ -34,21 +44,23 @@ export default function Navbar() {
       >
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2" aria-label="RAGATHON home">
-            <span className="text-lg font-extrabold tracking-tight">RAGATHON</span>
+            {/* <span className="text-lg font-extrabold tracking-tight">RAGATHON</span> */}
+            <img src={logo} alt="RAGATHON" className="h-8 w-auto" />
           </Link>
 
           {user && user.role === "admin" && (
             <div className="hidden md:flex items-center gap-3">
-              {adminTabs.map(([hash,label]) => {
-                const isActive = location.pathname === "/admin" && location.hash === String(hash);
+              {adminTabs.map(([tab,label]) => {
+                const isActive = location.pathname === "/dashboard" && activeTab === tab;
                 return (
-                  <Link
-                    key={String(hash)}
-                    to={`/admin${String(hash)}`}
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => goToAdminTab(tab)}
                     className={`text-sm font-medium px-2 py-1 rounded ${isActive ? 'text-accent' : 'text-muted'} hover:text-accent transition-colors`}
                   >
                     {label}
-                  </Link>
+                  </button>
                 );
               })}
             </div>

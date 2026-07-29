@@ -15,7 +15,7 @@ export default function LeaderboardPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-16">
-      <h1 className="text-3xl font-bold mb-6">Leaderboard</h1>
+      {/* <h1 className="text-3xl font-bold mb-6">Leaderboard</h1> */}
       <Leaderboard entries={entries} limit={50} />
     </main>
   );

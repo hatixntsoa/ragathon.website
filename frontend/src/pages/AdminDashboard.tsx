@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Play, Pause, RotateCcw, Download, FileSpreadsheet, FileText, Database, Maximize2, Minimize2, Eye, EyeOff } from "lucide-react";
-import React from "react";
+import { useAdminTab } from "../context/AdminTabContext";
+import { Play, Pause, RotateCcw, Download, FileSpreadsheet, FileText, Database, Eye, EyeOff } from "lucide-react";
 import Leaderboard from "../components/Leaderboard";
 import Toast from "../components/Toast";
 import { apiClient as api } from "../lib/api_client";
@@ -15,73 +14,15 @@ interface UsersResponse {
 
 function LeaderboardPreview() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     api
       .get<{ leaderboard: LeaderboardEntry[] }>("/submissions/leaderboard")
       .then((r) => setEntries(r.leaderboard))
       .catch(() => setEntries([]));
-
-    function onFullChange() {
-      const fsEl = document.fullscreenElement;
-      setIsFullscreen(!!fsEl);
-    }
-    document.addEventListener('fullscreenchange', onFullChange);
-    return () => document.removeEventListener('fullscreenchange', onFullChange);
   }, []);
 
-  async function toggleFullscreen() {
-    try {
-      const el = containerRef.current;
-      if (!el) return;
-      if (document.fullscreenElement === el) {
-        await document.exitFullscreen();
-      } else if (el.requestFullscreen) {
-        await el.requestFullscreen();
-      }
-    } catch {}
-  }
-
-  return (
-    <div className="relative">
-      <div ref={containerRef} className="flex items-end gap-6 justify-center mb-6">
-        <div className="text-center">
-          <div className="rounded-md border border-border-light p-6" style={{ height: 120, width: 180 }}>
-            <div className="text-sm text-muted">2</div>
-            <div className="font-bold text-xl">{entries[1]?.name ?? "-"}</div>
-            <div className="text-sm text-muted">{entries[1]?.best_score ?? ""}</div>
-          </div>
-        </div>
-        <div className="text-center">
-          <div className="rounded-md border border-border-light p-6 bg-accent/10" style={{ height: 160, width: 220 }}>
-            <div className="text-sm text-muted">1</div>
-            <div className="font-bold text-2xl">{entries[0]?.name ?? "-"}</div>
-            <div className="text-sm text-muted">{entries[0]?.best_score ?? ""}</div>
-          </div>
-        </div>
-        <div className="text-center">
-          <div className="rounded-md border border-border-light p-6" style={{ height: 120, width: 180 }}>
-            <div className="text-sm text-muted">3</div>
-            <div className="font-bold text-xl">{entries[2]?.name ?? "-"}</div>
-            <div className="text-sm text-muted">{entries[2]?.best_score ?? ""}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* fullscreen icon top-right inside component */}
-      <div className="absolute top-0 right-0 mt-[-8px] mr-[-8px]">
-        <button onClick={toggleFullscreen} title={isFullscreen ? 'Exit fullscreen' : 'View fullscreen'} className="inline-flex items-center justify-center rounded-full p-2 bg-bg border border-border-light dark:bg-surface dark:border-border-dark">
-          {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-        </button>
-      </div>
-
-      <div className="mt-8">
-        <Leaderboard entries={entries} limit={50} />
-      </div>
-    </div>
-  );
+  return <Leaderboard entries={entries} limit={50} />;
 }
 
 export default function AdminDashboard() {
@@ -131,7 +72,7 @@ export default function AdminDashboard() {
   const exportDb = () => api.download("/export/database", "ragathon.db");
   const exportFull = () => api.download("/export/full", `ragathon_export.zip`);
 
-  const [activeTab, setActiveTab] = useState<"users"|"submissions"|"timer"|"export"|"leaderboard"|"settings">("timer");
+  const { activeTab } = useAdminTab();
   const [toast, setToast] = useState<{message: string; type?: 'success'|'error'} | null>(null);
   const [sendStatus, setSendStatus] = useState<Record<string, 'idle'|'sending'|'sent'|'failed'>>({});
   const [smtpOk, setSmtpOk] = useState(false);
@@ -144,17 +85,9 @@ export default function AdminDashboard() {
   // settings state (dataset/github links + smtp/template)
   const [settings, setSettings] = useState<Record<string,string>>({});
 
-  const location = useLocation();
-
   useEffect(() => {
     api.get<Record<string,string>>("/admin/settings").then((s) => setSettings(s)).catch(() => {});
   }, []);
-
-  // update active tab when URL hash changes (navbar links use /admin#tab)
-  useEffect(() => {
-    const h = (location.hash || "").replace("#", "");
-    if (h) setActiveTab(h as any);
-  }, [location.hash]);
 
   function saveSettings(updated: Record<string,string>) {
     setSettings((prev) => ({...prev, ...updated}));
@@ -183,8 +116,8 @@ export default function AdminDashboard() {
       setEditingUser(true);
       const payload: Record<string, string> = { name: editForm.name, email: editForm.email };
       if (editForm.password && editForm.password.trim().length > 0) payload.password = editForm.password;
-      const identifier = (editUser as any).short_id || editUser.id;
-      await api.put(`/admin/users/${identifier}`, payload);
+      // const identifier = (editUser as any).short_id || editUser.id;
+      // await api.put(`/admin/users/${identifier}`, payload);
       setToast({ message: 'User updated', type: 'success' });
       setTimeout(() => setToast(null), 3000);
       setEditUser(null);
@@ -235,7 +168,7 @@ export default function AdminDashboard() {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
       </div>
 
-      {/* Tabs moved to navbar; AdminDashboard relies on URL hash to pick the active section. */}
+      {/* Tabs live in the navbar; AdminDashboard reads the active section from AdminTabContext. */}
 
       {activeTab === 'timer' && (
         <section className="rounded-xl border border-border-light dark:border-border-dark p-6 mb-8">
@@ -471,10 +404,9 @@ export default function AdminDashboard() {
       )}
 
       {activeTab === 'leaderboard' && (
-        <section className="rounded-xl border border-border-light dark:border-border-dark p-6 mb-8">
-          <h2 className="text-lg font-bold mb-6">Leaderboard</h2>
+        <div className="mb-8">
           <LeaderboardPreview />
-        </section>
+        </div>
       )}
 
       {activeTab === 'settings' && (

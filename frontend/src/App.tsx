@@ -7,6 +7,12 @@ import Login from "./pages/Login";
 import ParticipantDashboard from "./pages/ParticipantDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import LeaderboardPage from "./pages/LeaderboardPage";
+import { useAuth } from "./context/AuthContext";
+
+function DashboardRouter() {
+  const { user } = useAuth();
+  return user?.role === "admin" ? <AdminDashboard /> : <ParticipantDashboard />;
+}
 
 export default function App() {
   return (
@@ -20,16 +26,8 @@ export default function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute role="user">
-                <ParticipantDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute role="admin">
-                <AdminDashboard />
+              <ProtectedRoute>
+                <DashboardRouter />
               </ProtectedRoute>
             }
           />

@@ -19,8 +19,8 @@ export default function Login() {
     setError(null);
     setLoading(true);
     try {
-      const user = await login(username, password);
-      navigate(user.role === "admin" ? "/admin" : "/dashboard");
+      await login(username, password);
+      navigate("/dashboard");
     } catch {
       setError(t("auth.error_generic"));
     } finally {

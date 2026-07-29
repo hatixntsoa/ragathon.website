@@ -18,8 +18,8 @@ export default function Signup() {
     setError(null);
     setLoading(true);
     try {
-      const user = await register(name, email, password);
-      navigate(user.role === "admin" ? "/admin" : "/dashboard");
+      await register(name, email, password);
+      navigate("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : t("auth.error_generic"));
     } finally {
