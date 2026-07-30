@@ -257,7 +257,23 @@ router.post("/users/send", async (req: Request, res: Response) => {
 
     const smtpUser = settings["gmail_user"];
     const smtpPass = settings["gmail_pass"];
-    const template = settings["email_template"] || "Hello {{name}},\nYour credentials:\nemail: {{email}}\npassword: {{password}}";
+    const template = settings["email_template"] || `Greetings {{name}},
+
+Welcome to RAGATHON 2026 !
+
+All the instructions needed for this first edition of RAG Competition can be found here:
+https://drive.google.com/file/d/1DHk-6lFuH6VUiM2uN1yswOabQHqw3eHy/view?usp=sharing
+
+An optional boilerplate template can be found here as well:
+https://github.com/ilaikoto/ragathon.starter.kit
+
+And for the response submission you will need to use this custom platform below:
+
+Platform: https://ragathon.ilaikoto.com
+Username: {{name}}
+Password: {{password}}
+
+Good luck and have fun!`;
 
     if (!smtpUser || !smtpPass) return res.status(400).json({ error: "smtp_not_configured" });
 
@@ -268,7 +284,7 @@ router.post("/users/send", async (req: Request, res: Response) => {
     for (const row of toSend) {
       const html = template.replace(/{{name}}/g, row.name).replace(/{{email}}/g, row.email).replace(/{{password}}/g, row.plain_password);
       try {
-        await sendEmail(smtpUser, smtpPass, row.email, "RAGATHON credentials", html);
+        await sendEmail(smtpUser, smtpPass, row.email, "RAGATHON 2026 - Participant Instructions", html);
         db.prepare("DELETE FROM pending_credentials WHERE user_id = ?").run(row.id);
         logAction("admin.users.credentials.sent", { userId: row.id, email: row.email });
       } catch (err) {

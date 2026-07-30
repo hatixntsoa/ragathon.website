@@ -105,7 +105,7 @@ export default function ParticipantDashboard() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-10">
-        <ActionCard
+        {/* <ActionCard
           icon={Database}
           label={t("dashboard.data_label")}
           title={t("dashboard.data_access_title")}
@@ -119,7 +119,7 @@ export default function ParticipantDashboard() {
           title={t("dashboard.kaggle_title")}
           description={t("dashboard.kaggle_desc")}
           href={KAGGLE_URL}
-        />
+        /> */}
 
         <ActionCard
           icon={UploadCloud}
