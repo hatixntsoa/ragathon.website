@@ -266,7 +266,7 @@ We are delighted to have you participate in the first edition of RAG Competition
 All the competition guidelines, and submission instructions are available here:
 https://drive.google.com/file/d/<link-for-the-guidelines>/view?usp=sharing
 
-All the datasets need for the competition are available here:
+All the datasets needed for the competition are available here:
 https://drive.google.com/file/d/1DHk-6lFuH6VUiM2uN1yswOabQHqw3eHy/view?usp=sharing
 
 To help you get started quickly, we have also prepared an optional boilerplate project:
@@ -294,7 +294,7 @@ Good luck, and enjoy building!
       const html = template.replace(/{{name}}/g, row.name).replace(/{{email}}/g, row.email).replace(/{{password}}/g, row.plain_password);
       try {
         await sendEmail(smtpUser, smtpPass, row.email, "RAGATHON 2026 - Participant Instructions", html);
-        db.prepare("DELETE FROM pending_credentials WHERE user_id = ?").run(row.id);
+        // db.prepare("DELETE FROM pending_credentials WHERE user_id = ?").run(row.id);
         logAction("admin.users.credentials.sent", { userId: row.id, email: row.email });
       } catch (err) {
         // eslint-disable-next-line no-console
