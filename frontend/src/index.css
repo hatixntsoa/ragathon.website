@@ -38,6 +38,18 @@
     color: rgb(var(--color-fg));
   }
 
+  .pill-pass {
+    @apply border-green-200 bg-green-100 text-green-700 dark:border-green-900 dark:bg-green-900/30 dark:text-green-300;
+  }
+
+  .pill-fail {
+    @apply border-red-200 bg-red-100 text-red-700 dark:border-red-900 dark:bg-red-900/30 dark:text-red-300;
+  }
+
+  .pill-gray {
+    @apply border-yellow-200 bg-yellow-100 text-yellow-700 dark:border-yellow-900 dark:bg-yellow-900/30 dark:text-yellow-300;
+  }
+
   /* form inputs surface consistent with design and dark mode */
   input, textarea, select {
     background-color: rgb(var(--color-surface));

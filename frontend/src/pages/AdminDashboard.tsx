@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAdminTab } from "../context/AdminTabContext";
 import { Play, Pause, RotateCcw, Download, FileSpreadsheet, FileText, Database, Eye, EyeOff } from "lucide-react";
@@ -12,14 +12,177 @@ interface UsersResponse {
   users: AdminUserRow[];
 }
 
+interface AdminQuestion {
+  id: string;
+  question_id: string;
+  expected: string;
+  generated: string;
+  similarity: number;
+  zone: "pass" | "gray" | "fail";
+  review_status: "none" | "pending" | "approved" | "rejected";
+}
+
+interface AdminScoreRow {
+  id: string;
+  user_name: string;
+  status: string;
+  score: number | null;
+  total: number | null;
+  submitted_at: string;
+  questions: AdminQuestion[];
+  pass_count: number;
+  gray_count: number;
+  fail_count: number;
+}
+
+function ScoresReview() {
+  const [rows, setRows] = useState<AdminScoreRow[]>([]);
+
+  const load = useCallback(() => {
+    api
+      .get<{ submissions: AdminScoreRow[] }>("/admin/scores")
+      .then((r) => setRows(r.submissions))
+      .catch(() => setRows([]));
+  }, []);
+
+  useEffect(() => {
+    load();
+    const socket = getSocket();
+    socket.on("leaderboard:refresh", load);
+    return () => {
+      socket.off("leaderboard:refresh", load);
+    };
+  }, [load]);
+
+  async function review(submissionId: string, questionId: string, decision: "approved" | "rejected") {
+    await api.post(`/admin/scores/${submissionId}/questions/${questionId}/review`, { decision });
+    load();
+  }
+
+  return (
+    <div className="space-y-4">
+      {rows.length === 0 && <p className="text-sm text-muted">No submissions yet.</p>}
+      {rows.map((row) => {
+        // const pendingQuestions = row.questions.filter((q) => q.review_status === "pending");
+        const nonPassQuestions = row.questions.filter((q) => q.zone !== "pass");
+        return (
+          <div key={row.id} className="rounded-lg border border-border-light dark:border-border-dark p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div>
+                <p className="font-semibold">{row.user_name}</p>
+                <p className="text-xs text-muted">{new Date(row.submitted_at).toLocaleString()}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <span className="pill">{row.score ?? "-"} {row.total !== null ? `/ ${row.total}` : ""} &middot; {row.status}</span>
+                <span className="pill pill-pass">Pass {row.pass_count}</span>
+                <span className="pill pill-gray">Gray {row.gray_count}</span>
+                <span className="pill pill-fail">Fail {row.fail_count}</span>
+              </div>
+            </div>
+
+            {/* {pendingQuestions.length > 0 && (
+              <div className="space-y-3 mt-4">
+                {pendingQuestions.map((q) => (
+                  <div key={q.id} className="rounded-lg border border-accent/40 bg-accent/5 p-4">
+                    <p className="text-xs font-semibold text-muted mb-2">
+                      {q.question_id} &middot; similarity {q.similarity.toFixed(4)}
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                      <div>
+                        <p className="text-xs text-muted mb-1">Expected</p>
+                        <p className="text-sm rounded-md border border-border-light dark:border-border-dark p-2">{q.expected}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted mb-1">Submitted</p>
+                        <p className="text-sm rounded-md border border-border-light dark:border-border-dark p-2">{q.generated}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => review(row.id, q.id, "approved")}
+                        className="inline-flex items-center gap-2 rounded-md border border-border-light px-3 py-1.5 text-sm text-success hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => review(row.id, q.id, "rejected")}
+                        className="inline-flex items-center gap-2 rounded-md border border-border-light px-3 py-1.5 text-sm text-danger hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )} */}
+
+            {nonPassQuestions.length > 0 && (
+              <div className="space-y-3 mt-4">
+                {nonPassQuestions.map((q) => (
+                  <div
+                    key={q.id}
+                    className={`rounded-lg border p-4 ${q.zone === "fail" ? "border-danger/40 bg-danger/5" : "border-accent/40 bg-accent/5"}`}
+                  >
+                    <p className="text-xs font-semibold text-muted mb-2">
+                      {q.question_id} &middot; similarity {q.similarity.toFixed(4)} &middot; {q.zone}
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                      <div>
+                        <p className="text-xs text-muted mb-1">Expected</p>
+                        <p className="text-sm rounded-md border border-border-light dark:border-border-dark p-2">{q.expected}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted mb-1">Submitted</p>
+                        <p className="text-sm rounded-md border border-border-light dark:border-border-dark p-2">{q.generated}</p>
+                      </div>
+                    </div>
+                    {q.review_status === "pending" && (
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => review(row.id, q.id, "approved")}
+                          className="inline-flex items-center gap-2 rounded-md border border-border-light px-3 py-1.5 text-sm text-success hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => review(row.id, q.id, "rejected")}
+                          className="inline-flex items-center gap-2 rounded-md border border-border-light px-3 py-1.5 text-sm text-danger hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function LeaderboardPreview() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
 
   useEffect(() => {
-    api
-      .get<{ leaderboard: LeaderboardEntry[] }>("/submissions/leaderboard")
-      .then((r) => setEntries(r.leaderboard))
-      .catch(() => setEntries([]));
+    function load() {
+      api
+        .get<{ leaderboard: LeaderboardEntry[] }>("/submissions/leaderboard")
+        .then((r) => setEntries(r.leaderboard))
+        .catch(() => setEntries([]));
+    }
+    load();
+    const socket = getSocket();
+    socket.on("leaderboard:refresh", load);
+    return () => {
+      socket.off("leaderboard:refresh", load);
+    };
   }, []);
 
   return <Leaderboard entries={entries} limit={50} />;
@@ -384,7 +547,7 @@ export default function AdminDashboard() {
         </section>
       )}
 
-      {activeTab === 'submissions' && (
+      {/* {activeTab === 'submissions' && (
         <section className="rounded-xl border border-border-light dark:border-border-dark p-6 mb-8">
           <h2 className="text-lg font-bold mb-6">Submissions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -401,12 +564,19 @@ export default function AdminDashboard() {
             <button className="btn-primary" onClick={()=>saveSettings({dataset_link: settings['dataset_link']||'', github_template: settings['github_template']||''})}>Save</button>
           </div>
         </section>
-      )}
+      )} */}
 
       {activeTab === 'leaderboard' && (
         <div className="mb-8">
           <LeaderboardPreview />
         </div>
+      )}
+
+      {activeTab === 'scores' && (
+        <section className="rounded-xl border border-border-light dark:border-border-dark p-6 mb-8">
+          <h2 className="text-lg font-bold mb-6">Scores</h2>
+          <ScoresReview />
+        </section>
       )}
 
       {activeTab === 'settings' && (

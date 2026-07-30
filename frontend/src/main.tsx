@@ -5,6 +5,7 @@ import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { AdminTabProvider } from "./context/AdminTabContext";
+import { ParticipantTabProvider } from "./context/ParticipantTabContext";
 import "./i18n";
 import "./index.css";
 
@@ -14,7 +15,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <ThemeProvider>
         <AuthProvider>
           <AdminTabProvider>
-            <App />
+            <ParticipantTabProvider>
+              <App />
+            </ParticipantTabProvider>
           </AdminTabProvider>
         </AuthProvider>
       </ThemeProvider>

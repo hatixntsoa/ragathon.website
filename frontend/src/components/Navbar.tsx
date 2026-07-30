@@ -7,6 +7,7 @@ import logo from "../assets/ragathon.logo.svg";
 import Timer from "./Timer";
 import { useAuth } from "../context/AuthContext";
 import { useAdminTab, AdminTab } from "../context/AdminTabContext";
+import { useParticipantTab, ParticipantTab } from "../context/ParticipantTabContext";
 
 export default function Navbar() {
   const { t } = useTranslation();
@@ -14,6 +15,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { activeTab, setActiveTab } = useAdminTab();
+  const { activeTab: activeParticipantTab, setActiveTab: setActiveParticipantTab } = useParticipantTab();
 
   function handleLogout() {
     logout();
@@ -22,15 +24,29 @@ export default function Navbar() {
 
   const adminTabs: [AdminTab, string][] = [
     ["users", t("admin.nav_users")],
-    ["submissions", t("admin.nav_submissions")],
+    // ["submissions", t("admin.nav_submissions")],
     ["timer", t("admin.nav_timer")],
     ["export", t("admin.nav_export")],
     ["leaderboard", t("admin.nav_leaderboard")],
+    ["scores", t("admin.nav_scores")],
     ["settings", t("admin.nav_settings")],
+  ];
+
+  const participantTabs: [ParticipantTab, string][] = [
+    ["submission", t("dashboard.tab_submission")],
+    ["score", t("dashboard.tab_score")],
+    ["status", t("dashboard.tab_status")],
   ];
 
   function goToAdminTab(tab: AdminTab) {
     setActiveTab(tab);
+    if (location.pathname !== "/dashboard") {
+      navigate("/dashboard");
+    }
+  }
+
+  function goToParticipantTab(tab: ParticipantTab) {
+    setActiveParticipantTab(tab);
     if (location.pathname !== "/dashboard") {
       navigate("/dashboard");
     }
@@ -57,6 +73,24 @@ export default function Navbar() {
                     key={tab}
                     type="button"
                     onClick={() => goToAdminTab(tab)}
+                    className={`text-sm font-medium px-2 py-1 rounded ${isActive ? 'text-accent' : 'text-muted'} hover:text-accent transition-colors`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {user && user.role === "user" && (
+            <div className="hidden md:flex items-center gap-3">
+              {participantTabs.map(([tab, label]) => {
+                const isActive = location.pathname === "/dashboard" && activeParticipantTab === tab;
+                return (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => goToParticipantTab(tab)}
                     className={`text-sm font-medium px-2 py-1 rounded ${isActive ? 'text-accent' : 'text-muted'} hover:text-accent transition-colors`}
                   >
                     {label}

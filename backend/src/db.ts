@@ -68,6 +68,17 @@ export function initDb(): void {
       plain_password TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS submission_questions (
+      id TEXT PRIMARY KEY,
+      submission_id TEXT NOT NULL REFERENCES submissions(id) ON DELETE CASCADE,
+      question_id TEXT NOT NULL,
+      expected TEXT NOT NULL,
+      generated TEXT NOT NULL,
+      similarity REAL NOT NULL,
+      zone TEXT NOT NULL CHECK(zone IN ('pass','gray','fail')),
+      review_status TEXT NOT NULL DEFAULT 'none' CHECK(review_status IN ('none','pending','approved','rejected'))
+    );
   `);
 
   // Ensure short_id column exists on users (4 hex chars), add unique index
@@ -76,6 +87,12 @@ export function initDb(): void {
   if (!hasShort) {
     db.prepare("ALTER TABLE users ADD COLUMN short_id TEXT").run();
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_short_id ON users(short_id)").run();
+  }
+
+  const subCols = db.prepare("PRAGMA table_info(submissions)").all();
+  const hasTotal = subCols.some((c: any) => c.name === 'total');
+  if (!hasTotal) {
+    db.prepare("ALTER TABLE submissions ADD COLUMN total INTEGER").run();
   }
 
   const timerRow = db.prepare("SELECT id FROM timer WHERE id = 1").get();

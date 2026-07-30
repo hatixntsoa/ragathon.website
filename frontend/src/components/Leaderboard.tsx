@@ -10,7 +10,7 @@ interface LeaderboardProps {
 }
 
 function formatScore(entry: LeaderboardEntry): string {
-  return entry.best_score !== null ? entry.best_score.toFixed(4) : "-";
+  return entry.best_score !== null ? String(entry.best_score) : "-";
 }
 
 export default function Leaderboard({ entries, limit, showEmail }: LeaderboardProps) {

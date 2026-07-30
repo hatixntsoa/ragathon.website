@@ -10,6 +10,7 @@ import submissionRoutes from "./routes/submission";
 import evaluationRoutes from "./routes/evaluation";
 import exportRoutes from "./routes/export";
 import adminRoutes from "./routes/admin";
+import scoresRoutes from "./routes/scores";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use("/api/submissions", submissionRoutes);
 app.use("/api/evaluation", evaluationRoutes);
 app.use("/api/export", exportRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/admin/scores", scoresRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: "Not found" }));
 

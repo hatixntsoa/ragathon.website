@@ -16,6 +16,8 @@ services:
       - ragathon-net
     expose:
       - "4000"
+    depends_on:
+      - evaluation
 
   frontend:
     build:
@@ -32,6 +34,17 @@ services:
       - "80"
     depends_on:
       - backend
+
+  evaluation:
+    build:
+      context: ./evaluation
+      dockerfile: Dockerfile
+    container_name: ragathon-evaluation
+    restart: unless-stopped
+    networks:
+      - ragathon-net
+    expose:
+      - "8000"
 
   nginx:
     image: nginx:1.27-alpine

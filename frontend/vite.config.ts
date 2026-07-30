@@ -16,5 +16,6 @@ export default defineConfig({
         ws: true,
       },
     },
+    allowedHosts: ["c494-129-222-109-65.ngrok-free.app", "ragathon.ilaikoto.com"],
   },
 });

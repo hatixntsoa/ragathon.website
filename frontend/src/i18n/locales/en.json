@@ -71,14 +71,21 @@
     "status_scored": "Scored",
     "status_failed": "Failed",
     "timer_title": "Time remaining",
-    "timer_stopped": "Not started"
+    "timer_stopped": "Stopped",
+    "submissions_remaining": "{{count}} submission(s) remaining",
+    "tab_submission": "Submission",
+    "tab_score": "Score",
+    "tab_status": "Status",
+    "submission_evaluating_loading": "Evaluating...",
+    "submission_label": "Submission {{n}}",
+    "submissions_closed": "Submissions are closed."
   },
   "admin": {
     "title": "Admin dashboard",
     "nav_users": "Users",
     "nav_submissions": "Submissions",
     "nav_timer": "Timer",
-    "nav_export": "Data export",
+    "nav_export": "Data",
     "nav_leaderboard": "Leaderboard",
     "nav_settings": "Settings",
     "timer_control_title": "Timer control",
@@ -95,7 +102,8 @@
     "user_name": "Name",
     "user_email": "Email",
     "user_role": "Role",
-    "user_submissions": "Submissions"
+    "user_submissions": "Submissions",
+    "nav_scores": "Scores"
   },
   "footer": {
     "copyright": "© Copyright ILAIKOTO 2026"

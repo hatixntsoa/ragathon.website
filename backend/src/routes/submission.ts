@@ -5,7 +5,8 @@ import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../db";
 import { requireAuth, AuthedRequest } from "../middleware/auth";
-import { runEvaluation } from "./evaluation";
+import { runEvaluation, getMaxSubmissions } from "./evaluation";
+import { computeCurrentState } from "../socket";
 
 const router = Router();
 
@@ -44,6 +45,11 @@ router.post(
       return res.status(403).json({ error: "Admin accounts cannot submit models" });
     }
 
+    const timerState = computeCurrentState();
+    if (timerState.status !== "running") {
+      return res.status(403).json({ error: "submissions_closed" });
+    }
+
     const files = req.files as { [field: string]: Express.Multer.File[] } | undefined;
     const modelFile = files?.model?.[0];
 
@@ -53,6 +59,10 @@ router.post(
 
     const id = uuidv4();
     const userId = req.user!.sub;
+    const currentCount = (db.prepare("SELECT COUNT(*) AS c FROM submissions WHERE user_id = ?").get(userId) as { c: number }).c;
+    if (currentCount >= getMaxSubmissions()) {
+      return res.status(429).json({ error: "submission_limit_reached", remaining: 0 });
+    }
 
     db.prepare(
       `INSERT INTO submissions (id, user_id, model_filename, notebook_filename, status)
@@ -63,7 +73,7 @@ router.post(
     import("../logger").then(({ logAction }) => logAction("submission.created", { submissionId: id, userId }));
     setImmediate(() => runEvaluation(id));
 
-    return res.status(201).json({ submissionId: id, status: "pending" });
+    return res.status(201).json({ submissionId: id, status: "pending", remaining: getMaxSubmissions() - currentCount - 1 });
   }
 );
 
@@ -71,33 +81,47 @@ router.post(
 router.get("/mine", requireAuth, (req: AuthedRequest, res: Response) => {
   const rows = db
     .prepare(
-      `SELECT id, status, train_score, test_score, score, overfit_flag, submitted_at
+      `SELECT id, status, train_score, test_score, score, total, overfit_flag, submitted_at
        FROM submissions WHERE user_id = ? ORDER BY submitted_at DESC`
     )
-    .all(req.user!.sub);
-  return res.json({ submissions: rows });
+    .all(req.user!.sub) as { id: string }[];
+
+  const zoneStmt = db.prepare(
+    `SELECT zone, COUNT(*) c FROM submission_questions WHERE submission_id = ? GROUP BY zone`
+  );
+
+  const withZones = rows.map((row) => {
+    const zoneRows = zoneStmt.all(row.id) as { zone: string; c: number }[];
+    const counts = { pass_count: 0, gray_count: 0, fail_count: 0 };
+    for (const z of zoneRows) {
+      if (z.zone === "pass") counts.pass_count = z.c;
+      if (z.zone === "gray") counts.gray_count = z.c;
+      if (z.zone === "fail") counts.fail_count = z.c;
+    }
+    return { ...row, ...counts };
+  });
+
+  return res.json({ submissions: withZones, remaining: Math.max(0, getMaxSubmissions() - rows.length) });
 });
 
-// GET /api/submissions/leaderboard (public, MAX(score) per user)
+// GET /api/submissions/leaderboard (public, best submission per user, speed tie-break)
 router.get("/leaderboard", (_req, res: Response) => {
   const rows = db
     .prepare(
-      `SELECT u.name AS name, MAX(s.score) AS best_score
-       FROM submissions s
-       JOIN users u ON u.id = s.user_id
-       WHERE s.status = 'scored'
-       GROUP BY s.user_id
-       ORDER BY best_score DESC, LOWER(u.name) ASC`
+      `WITH best AS (
+         SELECT u.id AS user_id, s.score AS best_score, s.submitted_at AS submitted_at,
+                ROW_NUMBER() OVER (PARTITION BY s.user_id ORDER BY s.score DESC, s.submitted_at ASC) AS rn
+         FROM submissions s
+         JOIN users u ON u.id = s.user_id
+         WHERE s.status = 'scored'
+       )
+       SELECT u.name AS name, b.best_score AS best_score, b.submitted_at AS submitted_at
+       FROM users u
+       LEFT JOIN best b ON b.user_id = u.id AND b.rn = 1
+       WHERE u.role = 'user'
+       ORDER BY (b.best_score IS NULL) ASC, b.best_score DESC, b.submitted_at ASC, LOWER(u.name) ASC`
     )
     .all();
-
-  if (rows.length === 0) {
-    // No scored submissions yet: fall back to registered participants, alphabetical.
-    const fallback = db
-      .prepare(`SELECT name, NULL AS best_score FROM users WHERE role = 'user' ORDER BY LOWER(name) ASC`)
-      .all();
-    return res.json({ leaderboard: fallback });
-  }
 
   return res.json({ leaderboard: rows });
 });

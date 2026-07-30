@@ -29,3 +29,15 @@ ${body}
 
   return info;
 }
+
+export async function verifySmtpConnection(smtpUser: string, smtpPass: string) {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: smtpUser,
+      pass: smtpPass,
+    },
+  });
+
+  return transporter.verify();
+}

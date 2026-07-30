@@ -8,9 +8,38 @@ import fs from "fs";
 import XLSX from "xlsx";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
-import { sendEmail } from "../admin_email";
+import { sendEmail, verifySmtpConnection } from "../admin_email";
 import { logAction } from "../logger";
 import crypto from "crypto";
+
+
+// near the top of the file, after the imports
+const DEFAULT_EMAIL_TEMPLATE = `Greetings {{name}},
+
+Welcome to RAGATHON 2026!
+
+We are delighted to have you participate in the first edition of RAG Competition with AEENI.
+
+All the competition guidelines, and submission instructions are available here:
+https://drive.google.com/file/d/<link-for-the-guidelines>/view?usp=sharing
+
+All the datasets needed for the competition are available here:
+https://drive.google.com/file/d/1DHk-6lFuH6VUiM2uN1yswOabQHqw3eHy/view?usp=sharing
+
+To help you get started quickly, we have also prepared an optional boilerplate project:
+https://github.com/ilaikoto/ragathon.starter.kit
+
+Please use the following credentials to access the competition platform and submit your solution:
+
+Platform: https://ragathon.ilaikoto.com
+Username: {{name}}
+Password: {{password}}
+
+If you encounter any issues during the competition, feel free to ask the organizing team.
+
+We wish you the very best throughout the competition.
+Good luck, and enjoy building!
+`;
 
 const router = Router();
 
@@ -87,7 +116,7 @@ router.put('/users/:id', (req: Request, res: Response) => {
   try {
     const { name, email, role, password } = body;
     // support short_id as identifier as well
-    const user = db.prepare('SELECT id, short_id, email FROM users WHERE id = ? OR short_id = ?').get(id, id);
+    const user = db.prepare('SELECT id, short_id, email FROM users WHERE id = ? OR short_id = ?').get(id, id) as { id: string; short_id: string; email: string } | undefined;
     if (!user) {
       console.log(`[admin] user not found for identifier ${id}`);
       return res.status(404).json({ error: 'not_found' });
@@ -130,10 +159,10 @@ router.delete('/users/:id', (req: Request, res: Response) => {
   const { id } = req.params;
   console.log(`[admin] DELETE /users/${id} requested`);
   // resolve either uuid or short_id
-  const user = db.prepare('SELECT id, short_id, email FROM users WHERE id = ? OR short_id = ?').get(id, id);
+  const user = db.prepare('SELECT id, short_id, email FROM users WHERE id = ? OR short_id = ?').get(id, id) as { id: string; short_id: string; email: string } | undefined;
   if (!user) {
     console.log(`[admin] user not found for identifier ${id}`);
-    return res.status(404).json({ error: 'not_found' });
+    return res.status(404).json({ error: 'not_found' }); 
   }
   const realId = user.id;
   console.log(`[admin] resolved user to id=${realId} short_id=${user.short_id} email=${user.email}`);
@@ -216,6 +245,7 @@ router.get("/settings", (_req, res: Response) => {
   const rows = db.prepare("SELECT key, value FROM settings").all() as { key: string; value: string }[];
   const out: Record<string, string> = {};
   for (const r of rows) out[r.key] = r.value;
+  out["email_template"] = out["email_template"] || DEFAULT_EMAIL_TEMPLATE;
   return res.json(out);
 });
 
@@ -229,7 +259,7 @@ router.post("/settings", (req: Request, res: Response) => {
   return res.json({ ok: true });
 });
 
-// POST /api/admin/settings/test-smtp
+// POST /api/admin/settings/test-smtp (replace lines 233-248)
 router.post("/settings/test-smtp", async (_req, res: Response) => {
   const rows = db.prepare("SELECT key, value FROM settings").all() as { key: string; value: string }[];
   const settings: Record<string, string> = {};
@@ -238,7 +268,7 @@ router.post("/settings/test-smtp", async (_req, res: Response) => {
   const smtpPass = settings["gmail_pass"];
   if (!smtpUser || !smtpPass) return res.status(400).json({ error: "smtp_not_configured" });
   try {
-    await sendEmail(smtpUser, smtpPass, smtpUser, "RAGATHON SMTP test", "This is a test message from RAGATHON");
+    await verifySmtpConnection(smtpUser, smtpPass);
     return res.json({ ok: true });
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -257,32 +287,7 @@ router.post("/users/send", async (req: Request, res: Response) => {
 
     const smtpUser = settings["gmail_user"];
     const smtpPass = settings["gmail_pass"];
-    const template = settings["email_template"] || `Greetings {{name}},
-
-Welcome to RAGATHON 2026!
-
-We are delighted to have you participate in the first edition of RAG Competition with AEENI.
-
-All the competition guidelines, and submission instructions are available here:
-https://drive.google.com/file/d/<link-for-the-guidelines>/view?usp=sharing
-
-All the datasets needed for the competition are available here:
-https://drive.google.com/file/d/1DHk-6lFuH6VUiM2uN1yswOabQHqw3eHy/view?usp=sharing
-
-To help you get started quickly, we have also prepared an optional boilerplate project:
-https://github.com/ilaikoto/ragathon.starter.kit
-
-Please use the following credentials to access the competition platform and submit your solution:
-
-Platform: https://ragathon.ilaikoto.com
-Username: {{name}}
-Password: {{password}}
-
-If you encounter any issues during the competition, feel free to ask the organizing team.
-
-We wish you the very best throughout the competition.
-Good luck, and enjoy building!
-`;
+    const template = settings["email_template"] || DEFAULT_EMAIL_TEMPLATE;
 
     if (!smtpUser || !smtpPass) return res.status(400).json({ error: "smtp_not_configured" });
 
@@ -290,7 +295,7 @@ Good luck, and enjoy building!
       ? db.prepare("SELECT u.id, u.email, u.name, p.plain_password FROM users u JOIN pending_credentials p ON p.user_id = u.id WHERE (u.id IN (" + userIds.map(() => "?").join(",") + ") OR u.short_id IN (" + userIds.map(() => "?").join(",") + "))").all(...userIds, ...userIds)
       : db.prepare("SELECT u.id, u.email, u.name, p.plain_password FROM users u JOIN pending_credentials p ON p.user_id = u.id").all();
 
-    for (const row of toSend) {
+    for (const row of toSend as { id: string; email: string; name: string; plain_password: string }[]) {
       const html = template.replace(/{{name}}/g, row.name).replace(/{{email}}/g, row.email).replace(/{{password}}/g, row.plain_password);
       try {
         await sendEmail(smtpUser, smtpPass, row.email, "RAGATHON 2026 - Participant Instructions", html);
@@ -315,7 +320,7 @@ router.post('/users/delete', (req: Request, res: Response) => {
   const { id } = req.body as { id?: string };
   if (!id) return res.status(400).json({ error: 'id_required' });
   console.log(`[admin] POST /users/delete id=${id}`);
-  const user = db.prepare('SELECT id, short_id, email FROM users WHERE id = ? OR short_id = ?').get(id, id);
+  const user = db.prepare('SELECT id, short_id, email FROM users WHERE id = ? OR short_id = ?').get(id, id) as { id: string; short_id: string; email: string } | undefined;
   if (!user) {
     console.log(`[admin] user not found for identifier ${id}`);
     return res.status(404).json({ error: 'not_found' });

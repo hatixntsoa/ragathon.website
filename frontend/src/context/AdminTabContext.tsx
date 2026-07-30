@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 
-export type AdminTab = "users" | "submissions" | "timer" | "export" | "leaderboard" | "settings";
+// export type AdminTab = "users" | "submissions" | "timer" | "export" | "leaderboard" | "scores" | "settings";
+export type AdminTab = "users" | "timer" | "export" | "leaderboard" | "scores" | "settings";
 
 interface AdminTabContextValue {
   activeTab: AdminTab;
@@ -10,7 +11,7 @@ interface AdminTabContextValue {
 const AdminTabContext = createContext<AdminTabContextValue | undefined>(undefined);
 
 export function AdminTabProvider({ children }: { children: ReactNode }) {
-  const [activeTab, setActiveTab] = useState<AdminTab>("timer");
+  const [activeTab, setActiveTab] = useState<AdminTab>("leaderboard");
 
   return (
     <AdminTabContext.Provider value={{ activeTab, setActiveTab }}>

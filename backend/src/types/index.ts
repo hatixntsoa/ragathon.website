@@ -13,15 +13,16 @@ export type SubmissionStatus = "pending" | "evaluating" | "scored" | "failed";
 
 export interface Submission {
   id: string;
-  user_id: string;
-  model_filename: string;
-  notebook_filename: string;
   status: SubmissionStatus;
   train_score: number | null;
   test_score: number | null;
   score: number | null;
+  total: number | null;
   overfit_flag: 0 | 1 | null;
   submitted_at: string;
+  pass_count: number;
+  gray_count: number;
+  fail_count: number;
 }
 
 export type TimerStatus = "stopped" | "running" | "paused";

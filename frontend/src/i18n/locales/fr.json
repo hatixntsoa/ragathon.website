@@ -68,7 +68,14 @@
     "status_scored": "Évalué",
     "status_failed": "Échec",
     "timer_title": "Temps restant",
-    "timer_stopped": "Non démarré"
+    "timer_stopped": "Arrêté",
+    "submissions_remaining": "{{count}} soumission(s) restante(s)",
+    "tab_submission": "Soumission",
+    "tab_score": "Score",
+    "tab_status": "Statut",
+    "submission_evaluating_loading": "Évaluation en cours...",
+    "submission_label": "Soumission {{n}}",
+    "submissions_closed": "Les soumissions sont fermées."
   },
   "admin": {
     "title": "Tableau de bord admin",
@@ -86,7 +93,8 @@
     "user_name": "Nom",
     "user_email": "Email",
     "user_role": "Rôle",
-    "user_submissions": "Soumissions"
+    "user_submissions": "Soumissions",
+    "nav_scores": "Scores"
   },
   "footer": {
     "copyright": "© Copyright ILAIKOTO 2026"
