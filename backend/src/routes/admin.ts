@@ -259,21 +259,30 @@ router.post("/users/send", async (req: Request, res: Response) => {
     const smtpPass = settings["gmail_pass"];
     const template = settings["email_template"] || `Greetings {{name}},
 
-Welcome to RAGATHON 2026 !
+Welcome to RAGATHON 2026!
 
-All the instructions needed for this first edition of RAG Competition can be found here:
+We are delighted to have you participate in the first edition of RAG Competition with AEENI.
+
+All the competition guidelines, and submission instructions are available here:
+https://drive.google.com/file/d/<link-for-the-guidelines>/view?usp=sharing
+
+All the datasets need for the competition are available here:
 https://drive.google.com/file/d/1DHk-6lFuH6VUiM2uN1yswOabQHqw3eHy/view?usp=sharing
 
-An optional boilerplate template can be found here as well:
+To help you get started quickly, we have also prepared an optional boilerplate project:
 https://github.com/ilaikoto/ragathon.starter.kit
 
-And for the response submission you will need to use this custom platform below:
+Please use the following credentials to access the competition platform and submit your solution:
 
 Platform: https://ragathon.ilaikoto.com
 Username: {{name}}
 Password: {{password}}
 
-Good luck and have fun!`;
+If you encounter any issues during the competition, feel free to ask the organizing team.
+
+We wish you the very best throughout the competition.
+Good luck, and enjoy building!
+`;
 
     if (!smtpUser || !smtpPass) return res.status(400).json({ error: "smtp_not_configured" });
 
