@@ -7,7 +7,7 @@
   },
   "landing": {
     "hero_title": "Build. Evaluate. Rank.",
-    "hero_subtitle": "A competitive platform for RAG model builders. Access private datasets, ship on Kaggle, and get evaluated by an automated, tamper-proof engine.",
+    "hero_subtitle": "A competitive platform for RAG model builders. Access private datasets, develop your RAG system, and get evaluated by an automated, tamper-proof engine.",
     "cta_primary": "Enter the ragathon",
     "cta_secondary": "View rules",
     "steps_title": "How it works",

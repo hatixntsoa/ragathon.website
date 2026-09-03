@@ -7,7 +7,7 @@
   },
   "landing": {
     "hero_title": "Construire. Évaluer. Classer.",
-    "hero_subtitle": "Une plateforme compétitive pour les créateurs de modèles RAG. Accédez à des jeux de données privés, développez sur Kaggle, et faites évaluer votre travail par un moteur automatisé et infalsifiable.",
+    "hero_subtitle": "Une plateforme compétitive pour les créateurs de modèles RAG. Accédez à des données privées, développez le système RAG, et faites évaluer votre travail par un moteur automatisé et infalsifiable.",
     "cta_primary": "Entrer dans le ragathon",
     "cta_secondary": "Voir le règlement",
     "steps_title": "Comment ça marche",

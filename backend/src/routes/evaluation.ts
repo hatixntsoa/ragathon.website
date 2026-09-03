@@ -15,7 +15,7 @@ let maxSubmissionsCache = MAX_SUBMISSIONS;
 const router = Router();
 
 const UPLOAD_DIR = path.join(__dirname, "..", "..", "data", "uploads");
-const EVALUATION_SERVICE_URL = process.env.EVALUATION_SERVICE_URL || "http://192.168.67.106:8000";
+const EVALUATION_SERVICE_URL = process.env.EVALUATION_SERVICE_URL || "http://localhost:8000";
 
 const queue: string[] = [];
 let processing = false;

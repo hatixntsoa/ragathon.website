@@ -21,17 +21,19 @@ Welcome to RAGATHON 2026!
 We are delighted to have you participate in the first edition of RAG Competition with AEENI.
 
 All the competition guidelines, and submission instructions are available here:
-https://drive.google.com/file/d/<link-for-the-guidelines>/view?usp=sharing
+https://drive.google.com/file/d/1LlCm9BH2xckTiXht8lRDvvsv1SU02Qif/view?usp=sharing
 
 All the datasets needed for the competition are available here:
 https://drive.google.com/file/d/1DHk-6lFuH6VUiM2uN1yswOabQHqw3eHy/view?usp=sharing
+
+The questions the RAG need to answer are here:
+https://drive.google.com/file/d/1fTjM-VTVmZ3ji-l3GsUZqMODASmkDONn/view?usp=sharing
 
 To help you get started quickly, we have also prepared an optional boilerplate project:
 https://github.com/ilaikoto/ragathon.starter.kit
 
 Please use the following credentials to access the competition platform and submit your solution:
 
-Platform: https://ragathon.ilaikoto.com
 Username: {{name}}
 Password: {{password}}
 
